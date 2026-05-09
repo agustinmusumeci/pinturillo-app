@@ -1,0 +1,4 @@
+{
+  "name": "@pinturillo/shared",
+  "main": "./src/index.ts"
+}

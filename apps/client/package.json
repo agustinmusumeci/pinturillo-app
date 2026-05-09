@@ -1,0 +1,6 @@
+{
+  "name": "client",
+  "dependencies": {
+    "@pinturillo/shared": "workspace:*"
+  }
+}
