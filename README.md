@@ -17,10 +17,10 @@ The documentation can be found in `/docs`
 ├── apps/
 │    ├── client/
 │    └── server/
-│     
+│
 ├── packages/
 │    └── shared/
-│ 
+│
 ├── docs/
 ├── package.json
 └── pnpm-workspace.yaml
@@ -28,16 +28,20 @@ The documentation can be found in `/docs`
 
 ## ⚙️ Stack
 
-| Tech                         | Purpose                                          | Version          |
-| ---------------------------- | ------------------------------------------------ | ---------------- |
-| ExpressJS                    | Backend Framework for routes handling            |                  |
-| NodeJS                       | Backend enviroment with built in sockets         | ^24.0.0          |
-| NextJS                       | Frontend Framework                               |                  |
-| TypeScript                   | Main programming lenguaje                        |                  |
+| Tech       | Purpose                                  | Version |
+| ---------- | ---------------------------------------- | ------- |
+| ExpressJS  | Backend Framework for routes handling    |         |
+| NodeJS     | Backend enviroment with built in sockets | ^26.1.0 |
+| NextJS     | Frontend Framework                       |         |
+| TypeScript | Main programming lenguaje                |         |
 
-<!-- ## 🧞 Available commands
+## 🧞 Available commands
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| Command                                 | Action                                      |
+| :-------------------------------------- | :------------------------------------------ |
+| `pnpm install`                          | Installs dependencies                       |
+| `pnpm dev:server`                       | Starts local dev server at `localhost:3000` |
+| `pnpm dev:client`                       | Starts local dev page at `localhost:4000`   |
+| `pnpm --filter server add "dependency"` | Installs a devependency in server app       |
+| `pnpm --filter client add "dependency"` | Installs a devependency in client app       |
+| `pnpm add "dependency"`                 | Installs a devependency in globally         |

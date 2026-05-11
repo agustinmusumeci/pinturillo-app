@@ -1,8 +1,11 @@
 {
-  "name": "skribbl-clone",
+  "name": "pinturillo-app",
   "private": true,
   "scripts": {
     "dev:server": "pnpm --filter server dev",
     "dev:client": "pnpm --filter client dev"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
   }
 }
