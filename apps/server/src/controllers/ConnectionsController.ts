@@ -1,14 +1,14 @@
 import type { WebSocket as WsWebSocket, WebSocketServer } from "ws";
 import { Connection } from "../network/Connection";
 import { randomUUID } from "node:crypto";
-import { Events, WsEvent } from "../../../../packages/shared/src/events";
+import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
-import { RoomsControllers } from "./RoomsControllers";
+import roomsController from "./RoomsControllers";
 
-export class ConnectionController {
+export class ConnectionsController {
   private wss: WebSocketServer;
   private connections: Map<string, Connection> = new Map();
-  private roomsController = new RoomsControllers();
+  private roomsController = roomsController;
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
@@ -21,13 +21,22 @@ export class ConnectionController {
         const { event, payload } = JSON.parse(data.toString()) as WsEvent;
 
         switch (event) {
+          case Events.CREATE_ROOM:
+            break;
+
+          // Joining a room
+          // Payload: {name: string, roomId: string}
           case Events.JOIN_ROOM:
             const playerName = payload?.name;
             const roomId = payload?.roomId;
 
+            if (!roomId || !playerName) return;
+
             const player = new Player(playerName);
 
             const session = this.roomsController.joinRoom(roomId, player);
+
+            if (!session) return;
 
             const connection = this.connections.get(connectionId);
 
@@ -36,6 +45,9 @@ export class ConnectionController {
             break;
 
           case Events.LEAVE_ROOM:
+            break;
+
+          default:
             break;
         }
       });

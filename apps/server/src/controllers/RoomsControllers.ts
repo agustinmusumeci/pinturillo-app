@@ -5,12 +5,11 @@ import { Room } from "../domain/Room";
 export class RoomsControllers {
   private rooms: Map<string, Room> = new Map();
 
-  joinRoom(roomId: string, player: Player): PlayerSession {
+  joinRoom(roomId: string, player: Player): PlayerSession | null {
     let room = this.rooms.get(roomId);
 
     if (!room) {
-      room = new Room();
-      this.rooms.set(roomId, room);
+      return null;
     }
 
     const session = new PlayerSession(player, room);
@@ -18,3 +17,6 @@ export class RoomsControllers {
     return session;
   }
 }
+
+const roomsController = new RoomsControllers();
+export default roomsController;

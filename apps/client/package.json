@@ -1,5 +1,6 @@
 {
   "name": "client",
+  "type": "module",
   "dependencies": {
     "@pinturillo/shared": "workspace:*"
   }
