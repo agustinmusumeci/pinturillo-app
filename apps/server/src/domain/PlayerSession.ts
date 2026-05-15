@@ -16,4 +16,8 @@ export class PlayerSession {
   setRoom(room: Room) {
     this.room = room;
   }
+
+  getPlayer(): Player {
+    return this.player;
+  }
 }

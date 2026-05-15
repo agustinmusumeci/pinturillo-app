@@ -5,6 +5,7 @@ import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
+import { Room } from "../domain/Room";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -24,7 +25,7 @@ export class ConnectionsController {
         switch (event) {
           // Create a player and a player session after the socket connection is stablish
           // Payload: {name: string}
-          case Events.CREATE_PLAYER:
+          case Events.CREATE_PLAYER: {
             const playerName = payload?.name;
 
             const player = new Player(playerName);
@@ -33,34 +34,48 @@ export class ConnectionsController {
             this.connections.get(connectionId)?.setSession(new PlayerSession(player));
 
             break;
+          }
 
           // Create a room
-          // Payload: {name: string, hostPlayer: string, maximumPlayers: number, drawTime: number, totalGames: number, roundsPerGame: number, privacy: string, password: string}
-          case Events.CREATE_ROOM:
-            const { name, hostPlayer, maximumPlayers, drawTime, totalGames, roundesPerGame, privacy, password = "" } = payload;
+          // Payload: {name: string, maximumPlayers: number, drawTime: number, totalGames: number, roundsPerGame: number, privacy: string, password: string}
+          case Events.CREATE_ROOM: {
+            const { name, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password } = payload;
+
+            const connection = this.connections.get(connectionId);
+
+            const hostPlayerSession = connection?.getSession();
+
+            if (!hostPlayerSession) break;
+
+            roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
+
             break;
+          }
 
           // Joining a room
           // Payload: {name: string, roomId: string}
-          case Events.JOIN_ROOM:
+          case Events.JOIN_ROOM: {
             const roomId = payload?.roomId;
 
-            if (!roomId) return;
+            if (!roomId) break;
 
             const connection = this.connections.get(connectionId);
             const session = connection?.getSession();
 
-            if (!session) return;
+            if (!session) break;
 
             this.roomsController.joinRoom(roomId, session);
 
             break;
+          }
 
-          case Events.LEAVE_ROOM:
+          case Events.LEAVE_ROOM: {
             break;
+          }
 
-          default:
+          default: {
             break;
+          }
         }
       });
 
