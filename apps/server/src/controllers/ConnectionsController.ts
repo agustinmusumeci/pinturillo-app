@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
+import { PlayerSession } from "../domain/PlayerSession";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -21,26 +22,37 @@ export class ConnectionsController {
         const { event, payload } = JSON.parse(data.toString()) as WsEvent;
 
         switch (event) {
+          // Create a player and a player session after the socket connection is stablish
+          // Payload: {name: string}
+          case Events.CREATE_PLAYER:
+            const playerName = payload?.name;
+
+            const player = new Player(playerName);
+
+            // Add the player session to its socket connection
+            this.connections.get(connectionId)?.setSession(new PlayerSession(player));
+
+            break;
+
+          // Create a room
+          // Payload: {name: string, hostPlayer: string, maximumPlayers: number, drawTime: number, totalGames: number, roundsPerGame: number, privacy: string, password: string}
           case Events.CREATE_ROOM:
+            const { name, hostPlayer, maximumPlayers, drawTime, totalGames, roundesPerGame, privacy, password = "" } = payload;
             break;
 
           // Joining a room
           // Payload: {name: string, roomId: string}
           case Events.JOIN_ROOM:
-            const playerName = payload?.name;
             const roomId = payload?.roomId;
 
-            if (!roomId || !playerName) return;
+            if (!roomId) return;
 
-            const player = new Player(playerName);
-
-            const session = this.roomsController.joinRoom(roomId, player);
+            const connection = this.connections.get(connectionId);
+            const session = connection?.getSession();
 
             if (!session) return;
 
-            const connection = this.connections.get(connectionId);
-
-            connection?.setSession(session);
+            this.roomsController.joinRoom(roomId, session);
 
             break;
 

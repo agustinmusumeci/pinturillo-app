@@ -1,18 +1,18 @@
-import { Player } from "../domain/Player";
 import { PlayerSession } from "../domain/PlayerSession";
 import { Room } from "../domain/Room";
 
 export class RoomsControllers {
   private rooms: Map<string, Room> = new Map();
 
-  joinRoom(roomId: string, player: Player): PlayerSession | null {
+  joinRoom(roomId: string, session: PlayerSession) {
     let room = this.rooms.get(roomId);
 
     if (!room) {
       return null;
     }
 
-    const session = new PlayerSession(player, room);
+    // After joining the room, The class Room or RoomsController should broadcast that a new user have just joiner
+    session.setRoom(room);
 
     return session;
   }

@@ -14,4 +14,8 @@ export class Connection {
   setSession(session: PlayerSession) {
     this.session = session;
   }
+
+  getSession(): PlayerSession | null {
+    return this.session;
+  }
 }
