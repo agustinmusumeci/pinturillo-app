@@ -32,6 +32,8 @@ export class ConnectionsController {
             // Add the player session to its socket connection
             this.connections.get(connectionId)?.setSession(new PlayerSession(player, connectionId));
 
+            ws.send(JSON.stringify({ event: Events.CREATE_PLAYER, success: true }));
+
             break;
           }
 
@@ -44,9 +46,16 @@ export class ConnectionsController {
 
             const hostPlayerSession = connection?.getSession();
 
-            if (!hostPlayerSession) break;
+            if (!hostPlayerSession) {
+              // Send the NACK
+              ws.send(JSON.stringify({ event: Events.CREATE_ROOM, success: false }));
+              break;
+            }
 
             roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
+
+            //Send the ACK
+            ws.send(JSON.stringify({ event: Events.CREATE_ROOM, success: true }));
 
             break;
           }
@@ -56,14 +65,28 @@ export class ConnectionsController {
           case Events.JOIN_ROOM: {
             const roomId = payload?.roomId;
 
-            if (!roomId) break;
-
             const connection = this.connections.get(connectionId);
             const session = connection?.getSession();
 
-            if (!session) break;
+            if (!session || !roomId) {
+              // Send the NACK
+              ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: false }));
+              break;
+            }
 
-            this.roomsController.joinRoom(roomId, session);
+            const response = this.roomsController.joinRoom(roomId, session);
+
+            if (!response) {
+              // Send the NACK
+              ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: false }));
+              break;
+            }
+
+            // Send the ACK
+            ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: true }));
+
+            // Broadcast to every connection on the room
+            this.broadcast({ ...response, playerSessions: response.playerSessions.length }, response.playerSessions);
 
             break;
           }

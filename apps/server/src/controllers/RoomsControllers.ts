@@ -20,17 +20,23 @@ export class RoomsControllers {
     return room;
   }
 
-  joinRoom(roomId: string, session: PlayerSession) {
+  joinRoom(roomId: string, session: PlayerSession): { newPlayerId: string; playerSessions: PlayerSession[] } | null {
     let room = this.rooms.get(roomId);
 
     if (!room) {
       return null;
     }
 
-    // After joining the room, The class Room or RoomsController should broadcast that a new user have just joiner
     session.setRoom(room);
+    const playerSessions = room.getPlayers();
+    room.joinRoom(session);
 
-    return session;
+    let response = {
+      newPlayerId: session.getPlayer().getData().id,
+      playerSessions: playerSessions,
+    };
+
+    return response;
   }
 
   leaveRoom(session: PlayerSession): { removedPlayerId: string; newHostId?: string; remainingSessions: PlayerSession[] } | null {

@@ -58,6 +58,10 @@ export class Room {
     return this.playerSessions;
   }
 
+  joinRoom(session: PlayerSession) {
+    this.playerSessions.push(session);
+  }
+
   leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } {
     let response: { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } = {
       removedPlayerId: playerId,
