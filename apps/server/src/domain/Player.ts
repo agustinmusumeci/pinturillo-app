@@ -12,4 +12,8 @@ export class Player {
     this.score = 0;
     this.winGames = 0;
   }
+
+  getData(): { id: string; name: string } {
+    return { id: this.id, name: this.name };
+  }
 }

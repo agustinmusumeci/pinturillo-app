@@ -45,4 +45,52 @@ export class Room {
       this.password = password;
     }
   }
+
+  getId(): string {
+    return this.id;
+  }
+
+  getHostPlayer(): PlayerSession {
+    return this.hostPlayer;
+  }
+
+  getPlayers(): PlayerSession[] {
+    return this.playerSessions;
+  }
+
+  leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } {
+    let response: { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } = {
+      removedPlayerId: playerId,
+      remainingSessions: [],
+    };
+
+    // Remove the player
+    const filteredPlayerSessiones = this.playerSessions.filter((session) => {
+      const player = session.getPlayer();
+      const data = player.getData();
+
+      if (data.id === playerId) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    this.playerSessions = filteredPlayerSessiones;
+    response["remainingSessions"] = filteredPlayerSessiones;
+
+    // If the player that leaves is the host, select a new host
+    const host = this.hostPlayer.getPlayer().getData();
+
+    if (host.id === playerId && this.playerSessions.length > 0) {
+      const newHost = this.playerSessions[0];
+
+      if (newHost) {
+        this.hostPlayer = newHost;
+        response["hostPlayerId"] = newHost.getPlayer().getData().id;
+      }
+    }
+
+    return response;
+  }
 }

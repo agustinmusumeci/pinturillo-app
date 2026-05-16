@@ -10,12 +10,15 @@ export class Connection {
     this.id = id;
     this.ws = ws;
   }
+  getSession(): PlayerSession | null {
+    return this.session;
+  }
+
+  send(data: any) {
+    this.ws.send(data);
+  }
 
   setSession(session: PlayerSession) {
     this.session = session;
-  }
-
-  getSession(): PlayerSession | null {
-    return this.session;
   }
 }

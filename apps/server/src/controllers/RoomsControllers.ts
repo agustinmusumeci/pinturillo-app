@@ -32,6 +32,33 @@ export class RoomsControllers {
 
     return session;
   }
+
+  leaveRoom(session: PlayerSession): { removedPlayerId: string; newHostId?: string; remainingSessions: PlayerSession[] } | null {
+    const player = session.getPlayer();
+    const data = player.getData();
+
+    const room = session.leaveRoom();
+
+    if (!room) return null;
+
+    // If there is only one player, then erase the room
+    const roomsPlayers = room.getPlayers();
+
+    if (roomsPlayers?.length === 1) {
+      const roomId = room?.getId();
+      this.rooms.delete(roomId);
+
+      // Then notify the last user that the room has been removed
+      // HERE
+      return {
+        removedPlayerId: player.getData().id,
+        remainingSessions: [],
+      };
+    }
+
+    // If there are more than one player, remove the player and update the host if necessary
+    return room?.leaveRoom(data.id);
+  }
 }
 
 const roomsController = new RoomsControllers();

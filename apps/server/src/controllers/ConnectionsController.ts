@@ -5,7 +5,6 @@ import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
-import { Room } from "../domain/Room";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -31,7 +30,7 @@ export class ConnectionsController {
             const player = new Player(playerName);
 
             // Add the player session to its socket connection
-            this.connections.get(connectionId)?.setSession(new PlayerSession(player));
+            this.connections.get(connectionId)?.setSession(new PlayerSession(player, connectionId));
 
             break;
           }
@@ -52,7 +51,7 @@ export class ConnectionsController {
             break;
           }
 
-          // Joining a room
+          // Join a room
           // Payload: {name: string, roomId: string}
           case Events.JOIN_ROOM: {
             const roomId = payload?.roomId;
@@ -69,7 +68,31 @@ export class ConnectionsController {
             break;
           }
 
+          // Leave a room
           case Events.LEAVE_ROOM: {
+            const conenction = this.connections.get(connectionId);
+
+            const session = conenction?.getSession();
+
+            if (!session || !conenction) break;
+
+            const response = roomsController.leaveRoom(session);
+
+            if (!response) {
+              // Send the NACK
+              ws.send(JSON.stringify({ event: Events.LEAVE_ROOM, success: false }));
+
+              break;
+            }
+
+            const dataToBroadcast = { ...response, remainingSessions: response.remainingSessions.length };
+
+            // Send the ACK
+            ws.send(JSON.stringify({ event: Events.LEAVE_ROOM, success: true }));
+
+            // Broadcast to every connection on the room
+            this.broadcast(dataToBroadcast, response.remainingSessions);
+
             break;
           }
 
@@ -97,5 +120,17 @@ export class ConnectionsController {
 
   private removeConnection(connectionId: string): Boolean {
     return this.connections.delete(connectionId);
+  }
+
+  private broadcast(data: any, hosts: PlayerSession[]) {
+    for (const host of hosts) {
+      const connectionId = host.getConnectionId();
+
+      if (!connectionId) continue;
+
+      const conn = this.connections.get(connectionId);
+
+      conn?.send(data);
+    }
   }
 }
