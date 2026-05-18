@@ -65,6 +65,26 @@ export class RoomsControllers {
     // If there are more than one player, remove the player and update the host if necessary
     return room?.leaveRoom(data.id);
   }
+
+  startRoomGame(session: PlayerSession) {
+    const room = session.getRoom()
+
+    if (!room) return null
+
+    const gameData = room.startGame()
+
+    return gameData
+  }
+
+  getSessions(session: PlayerSession) {
+    const room = session.getRoom()
+
+    if (!room) return null
+
+    const sessions = room.getPlayers()
+
+    return sessions
+  }
 }
 
 const roomsController = new RoomsControllers();

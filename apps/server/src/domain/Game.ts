@@ -8,7 +8,7 @@ export class Game {
   private id: string;
   private players: Player[];
   private pendingPlayers: Player[];
-  private currentDrawer: Player;
+  private currentDrawer: Player | null;
   private drawTime: number;
   private currentWord: string;
   private optionWords: string[];
@@ -22,24 +22,15 @@ export class Game {
 
   constructor(
     players: Player[],
-    pendingPlayers: Player[] = [],
-    currentDrawer: Player,
     drawTime: number,
-    currentWord: string,
-    optionWords: string[],
-    selectedWords: string[],
-    currentRound: number,
     totalRounds: number,
-    hasDrawnPlayers: Player[],
-    board: Trace[],
-    guesses: Guess[],
   ) {
     this.id = randomUUID();
     this.players = players;
-    this.pendingPlayers = pendingPlayers;
-    this.currentDrawer = currentDrawer;
+    this.pendingPlayers = [];
+    this.currentDrawer = null;
     this.drawTime = drawTime;
-    this.currentWord = currentWord;
+    this.currentWord = "";
     this.words = [];
     this.optionWords = [];
     this.selectedWords = [];
@@ -48,5 +39,9 @@ export class Game {
     this.hasDrawnPlayers = [];
     this.board = [];
     this.guesses = [];
+  }
+
+  getId(): string{
+    return this.id
   }
 }

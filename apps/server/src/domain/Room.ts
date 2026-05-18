@@ -97,4 +97,18 @@ export class Room {
 
     return response;
   }
+
+  startGame(): { gameId: string; drawTime: number; totalRounds: number; players: PlayerSession[] } | null {
+    const players = this.playerSessions.map((session) => session.getPlayer());
+    const game = new Game(players, this.drawTime, this.roundsPerGame);
+
+    this.currentGame = game;
+
+    return {
+      gameId: game.getId(),
+      drawTime: this.drawTime,
+      totalRounds: this.roundsPerGame,
+      players: this.playerSessions,
+    };
+  }
 }

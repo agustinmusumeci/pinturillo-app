@@ -120,6 +120,30 @@ export class ConnectionsController {
           }
           
           case Events.START_GAME: {
+            const connection = this.connections.get(connectionId)
+
+            if (!connection) {
+              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              break;
+            }
+
+            const session = connection.getSession()
+
+            if (!session) {
+              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              break;
+            }
+
+            const response = roomsController.startRoomGame(session)
+            const sessions = roomsController.getSessions(session)
+
+            if (!response || !sessions) {
+              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              break;
+            }
+
+            this.broadcast({...response, players: []}, sessions)
+
             break;
           }
 
