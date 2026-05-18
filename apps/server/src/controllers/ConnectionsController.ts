@@ -118,6 +118,10 @@ export class ConnectionsController {
 
             break;
           }
+          
+          case Events.START_GAME: {
+            break;
+          }
 
           default: {
             break;
@@ -145,7 +149,7 @@ export class ConnectionsController {
     return this.connections.delete(connectionId);
   }
 
-  private broadcast(data: any, hosts: PlayerSession[]) {
+  private broadcast(payload: any, hosts: PlayerSession[]) {
     for (const host of hosts) {
       const connectionId = host.getConnectionId();
 
@@ -153,7 +157,7 @@ export class ConnectionsController {
 
       const conn = this.connections.get(connectionId);
 
-      conn?.send(data);
+      conn?.send(payload);
     }
   }
 }

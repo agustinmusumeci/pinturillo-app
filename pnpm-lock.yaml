@@ -26,9 +26,6 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
-      '@types/node':
-        specifier: ^25.6.2
-        version: 25.6.2
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -36,6 +33,9 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.6.2
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
