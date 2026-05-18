@@ -24,3 +24,14 @@ The broadcast will include information relevant to the new state of the modified
     playersSession: Number
 }
 ```
+
+- START_GAME Event broadcast:
+
+```
+{
+    gameId: String
+    drawTime: Number
+    totalRounds: Number
+    players: Player[]
+}
+```
