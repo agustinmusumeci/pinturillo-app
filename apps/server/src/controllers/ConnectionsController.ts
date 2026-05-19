@@ -83,7 +83,7 @@ export class ConnectionsController {
             }
 
             // Send the ACK
-            ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: true }));
+            ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: true, payload: { players: response.playerSessions.map((session) => session.getPlayer().getData()) } }));
 
             // Broadcast to every connection on the room
             this.broadcast({ ...response, playerSessions: response.playerSessions.length }, response.playerSessions);
@@ -118,31 +118,31 @@ export class ConnectionsController {
 
             break;
           }
-          
+
           case Events.START_GAME: {
-            const connection = this.connections.get(connectionId)
+            const connection = this.connections.get(connectionId);
 
             if (!connection) {
-              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
               break;
             }
 
-            const session = connection.getSession()
+            const session = connection.getSession();
 
             if (!session) {
-              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
               break;
             }
 
-            const response = roomsController.startRoomGame(session)
-            const sessions = roomsController.getSessions(session)
+            const response = roomsController.startRoomGame(session);
+            const sessions = roomsController.getSessions(session);
 
             if (!response || !sessions) {
-              ws.send(JSON.stringify({event: Events.START_GAME, success: false}))
+              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
               break;
             }
 
-            this.broadcast({...response, players: []}, sessions)
+            this.broadcast({ ...response, players: [] }, sessions);
 
             break;
           }
