@@ -8,5 +8,6 @@ The ACK will include the name of the event and the success status as a boolean v
 {
     event: Event
     sucess: Boolean
+    payload?: Any
 }
 ```
