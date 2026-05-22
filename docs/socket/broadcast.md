@@ -75,14 +75,12 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
-- NOTIFY_DRAWER Event broadcast:
+- START_DRAW Event broadcast:
 
 ```
 {
-    optionWords: String[]
-    selectTime: Number
-    timestamp: Number
-    token: String
+    drawTime: Number
+    wordLength: Number
 }
 ```
 
