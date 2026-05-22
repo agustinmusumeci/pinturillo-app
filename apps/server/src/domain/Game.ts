@@ -146,11 +146,11 @@ export class Game extends EventEmitter {
     this.setUpRound();
   }
 
-  emit(event: Events, sessions: PlayerSession[], payload: any): boolean {
-    return super.emit(event, sessions, payload);
+  emit(event: Events, sessions: PlayerSession[], data: any): boolean {
+    return super.emit(event, sessions, data);
   }
 
-  on(event: Events, callback: (sessions: PlayerSession[], payload: any) => void) {
+  on(event: Events, callback: (sessions: PlayerSession[], data: any) => void) {
     return super.on(event, callback);
   }
 }

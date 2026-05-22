@@ -150,7 +150,18 @@ export class ConnectionsController {
 
             this.gamesController.registerGameListener(game);
 
-            this.broadcast({ ...response, players: response.players.map((session) => session.getPlayer().getData()) }, sessions);
+            const payload = {
+              event: Events.CREATE_ROOM,
+              sucess: true,
+              data: {
+                gameId: response.gameId,
+                drawTime: response.drawTime,
+                totalRounds: response.totalRounds,
+                players: response.players.map((session) => session.getPlayer().getData),
+              },
+            };
+
+            this.broadcast(payload, sessions);
 
             game.startGame();
 

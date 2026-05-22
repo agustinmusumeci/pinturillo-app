@@ -14,7 +14,11 @@ export class GamesController {
   registerGameListener(game: Game) {
     this.games.set(game.getId(), game);
 
-    // game.on(Events.START_GAME, () => {});
+    game.on(Events.START_ROUND, (sessions: PlayerSession[], data: any) => {
+      const payload = { event: Events.START_ROUND, data: data, success: true };
+
+      this.broadcast(payload, sessions);
+    });
   }
 
   selectWord(gameId: string, word: string, emisionTimestamp: number, currentTimestamp: number, token: string) {
