@@ -14,8 +14,30 @@ export class GamesController {
   registerGameListener(game: Game) {
     this.games.set(game.getId(), game);
 
-    game.on(Events.START_ROUND, (sessions: PlayerSession[], data: any) => {
-      const payload = { event: Events.START_ROUND, data: data, success: true };
+    game.on(
+      Events.START_ROUND,
+      (
+        sessions: PlayerSession[],
+        data: {
+          currentRound: number;
+          drawTime: number;
+          currentDrawer: { id: string; name: string };
+        },
+      ) => {
+        const payload = { event: Events.START_ROUND, data: data, success: true };
+
+        this.broadcast(payload, sessions);
+      },
+    );
+
+    game.on(Events.NOTIFY_DRAWER, (sessions: PlayerSession[], data: { optionWords: string[]; selectTime: number; timestamp: number; token: string }) => {
+      const payload = { event: Events.NOTIFY_DRAWER, data: data, success: true };
+
+      this.broadcast(payload, sessions);
+    });
+
+    game.on(Events.END_GAME, (sessions: PlayerSession[], data: {}) => {
+      const payload = { event: Events.END_GAME, success: true };
 
       this.broadcast(payload, sessions);
     });
