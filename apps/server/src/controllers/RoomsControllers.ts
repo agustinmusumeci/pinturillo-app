@@ -67,23 +67,31 @@ export class RoomsControllers {
   }
 
   startRoomGame(session: PlayerSession) {
-    const room = session.getRoom()
+    const room = session.getRoom();
 
-    if (!room) return null
+    if (!room) return null;
 
-    const gameData = room.startGame()
+    const gameData = room.createGame();
 
-    return gameData
+    return gameData;
   }
 
   getSessions(session: PlayerSession) {
-    const room = session.getRoom()
+    const room = session.getRoom();
 
-    if (!room) return null
+    if (!room) return null;
 
-    const sessions = room.getPlayers()
+    const sessions = room.getPlayers();
 
-    return sessions
+    return sessions;
+  }
+
+  getGameId(session: PlayerSession) {
+    const room = session.getRoom();
+
+    if (!room) return null;
+
+    room.getGameId();
   }
 }
 

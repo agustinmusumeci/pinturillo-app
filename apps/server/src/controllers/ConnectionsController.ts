@@ -5,11 +5,14 @@ import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
+import { Game } from "../domain/Game";
+import { GamesController } from "./GamesController";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
   private connections: Map<string, Connection> = new Map();
   private roomsController = roomsController;
+  private gamesController = new GamesController(this.broadcast);
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
@@ -93,11 +96,11 @@ export class ConnectionsController {
 
           // Leave a room
           case Events.LEAVE_ROOM: {
-            const conenction = this.connections.get(connectionId);
+            const connenction = this.connections.get(connectionId);
 
-            const session = conenction?.getSession();
+            const session = connenction?.getSession();
 
-            if (!session || !conenction) break;
+            if (!session || !connenction) break;
 
             const response = roomsController.leaveRoom(session);
 
@@ -119,6 +122,7 @@ export class ConnectionsController {
             break;
           }
 
+          // Start a new game
           case Events.START_GAME: {
             const connection = this.connections.get(connectionId);
 
@@ -142,7 +146,46 @@ export class ConnectionsController {
               break;
             }
 
-            this.broadcast({ ...response, players: [] }, sessions);
+            const game = response.game;
+
+            this.gamesController.registerGameListener(game);
+
+            this.broadcast({ ...response, players: response.players.map((session) => session.getPlayer().getData()) }, sessions);
+
+            game.startGame();
+
+            break;
+          }
+
+          // Drawer select a word
+          // payload: {word: string, timestamp: string, token: string}
+          case Events.SELECT_WORD: {
+            if (!payload?.token) {
+              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
+              break;
+            }
+
+            const connection = this.connections.get(connectionId);
+
+            if (!connection) {
+              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
+              break;
+            }
+
+            const session = connection.getSession();
+
+            if (!session) {
+              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
+              break;
+            }
+
+            const gameId = this.roomsController.getGameId(session) ?? "";
+            const word = payload?.word;
+            const emisionTimestamp = payload?.timestamp / 60;
+            const currentTimestamp = Date.now() / 60;
+            const token = payload?.token;
+
+            this.gamesController.selectWord(gameId, word, emisionTimestamp, currentTimestamp, token);
 
             break;
           }
@@ -173,7 +216,7 @@ export class ConnectionsController {
     return this.connections.delete(connectionId);
   }
 
-  private broadcast(payload: any, hosts: PlayerSession[]) {
+  broadcast(payload: any, hosts: PlayerSession[]) {
     for (const host of hosts) {
       const connectionId = host.getConnectionId();
 

@@ -17,7 +17,7 @@ export class Room {
   private currentGame: Game | null = null;
   private status: RoomStatusType;
   private privacy: RoomPrivacyType;
-  private password: string | undefined;
+  private password: string | null = null;
 
   constructor(
     name: string = "",
@@ -27,7 +27,7 @@ export class Room {
     totalGames: number = MaximumTotalGames,
     roundsPerGame: number = MaximumTotalRounds,
     privacy: RoomPrivacyType = RoomPrivacy.PUBLIC,
-    password: string | undefined,
+    password: string | null,
   ) {
     this.id = randomUUID();
     this.name = name;
@@ -98,17 +98,21 @@ export class Room {
     return response;
   }
 
-  startGame(): { gameId: string; drawTime: number; totalRounds: number; players: PlayerSession[] } | null {
-    const players = this.playerSessions.map((session) => session.getPlayer());
-    const game = new Game(players, this.drawTime, this.roundsPerGame);
+  createGame(): { game: Game; gameId: string; drawTime: number; totalRounds: number; players: PlayerSession[] } | null {
+    const game = new Game(this.playerSessions, this.drawTime, this.roundsPerGame);
 
     this.currentGame = game;
 
     return {
+      game: game,
       gameId: game.getId(),
       drawTime: this.drawTime,
       totalRounds: this.roundsPerGame,
       players: this.playerSessions,
     };
+  }
+
+  getGameId() {
+    return this.currentGame?.getId();
   }
 }

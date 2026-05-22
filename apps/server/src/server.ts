@@ -7,7 +7,7 @@ const PORT = 3000;
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer });
 
-const connectionController = new ConnectionsController(wss);
+export const connectionController = new ConnectionsController(wss);
 
 httpServer.listen(PORT, () => {
   console.log(`Server at http://localhost:${PORT}`);
