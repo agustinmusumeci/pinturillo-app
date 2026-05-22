@@ -133,7 +133,7 @@ export class Game extends EventEmitter {
   selectWord(word: string) {
     this.currentWord = word;
 
-    this.emit(Events.START_DRAW, this.players, { start: true });
+    this.emit(Events.START_DRAW, this.players, { drawTime: this.drawTime });
   }
 
   getId(): string {
