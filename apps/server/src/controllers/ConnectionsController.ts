@@ -88,8 +88,14 @@ export class ConnectionsController {
             // Send the ACK
             ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: true, payload: { players: response.playerSessions.map((session) => session.getPlayer().getData()) } }));
 
+            const data = {
+              event: Events.JOIN_ROOM,
+              success: true,
+              data: { ...response, players: response.playerSessions.length },
+            };
+
             // Broadcast to every connection on the room
-            this.broadcast({ ...response, playerSessions: response.playerSessions.length }, response.playerSessions);
+            this.broadcast(data, response.playerSessions);
 
             break;
           }
@@ -116,8 +122,14 @@ export class ConnectionsController {
             // Send the ACK
             ws.send(JSON.stringify({ event: Events.LEAVE_ROOM, success: true }));
 
+            const data = {
+              event: Events.LEAVE_ROOM,
+              success: true,
+              data: dataToBroadcast,
+            };
+
             // Broadcast to every connection on the room
-            this.broadcast(dataToBroadcast, response.remainingSessions);
+            this.broadcast(data, response.remainingSessions);
 
             break;
           }
@@ -150,7 +162,7 @@ export class ConnectionsController {
 
             this.gamesController.registerGameListener(game);
 
-            const payload = {
+            const data = {
               event: Events.CREATE_ROOM,
               sucess: true,
               data: {
@@ -161,7 +173,7 @@ export class ConnectionsController {
               },
             };
 
-            this.broadcast(payload, sessions);
+            this.broadcast(data, sessions);
 
             game.startGame();
 
