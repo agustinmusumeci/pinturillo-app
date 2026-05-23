@@ -5,14 +5,15 @@ import { Events, WsEvent } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
-import { Game } from "../domain/Game";
 import { GamesController } from "./GamesController";
+import { SocketEventsHandler } from "../helpers/SocketEventsHandler";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
   private connections: Map<string, Connection> = new Map();
   private roomsController = roomsController;
   private gamesController = new GamesController(this.broadcast);
+  private eventsHandler = new SocketEventsHandler();
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
@@ -237,7 +238,9 @@ export class ConnectionsController {
     return this.connections.delete(connectionId);
   }
 
-  private checkConnection(connectionId: string, ws: WsWebSocket, event: Events) {
+  private checkConnection(connectionId: string, ws: WsWebSocket, payload: any) {
+    const { event, data } = JSON.parse(payload.toString()) as WsEvent;
+
     const connection = this.connections.get(connectionId);
 
     if (!connection) {

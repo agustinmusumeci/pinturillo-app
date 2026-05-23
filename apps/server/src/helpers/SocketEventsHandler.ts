@@ -6,8 +6,10 @@ export type MiddlewareFn = (data: any, next: (...args: any) => void) => void;
 export class SocketEventsHandler {
   private events = new Map<Events, MiddlewareFn[]>();
 
-  on(event: Events, middlewares: MiddlewareFn[]) {
+  on(event: Events, middlewares: MiddlewareFn[]): this {
     this.events.set(event, middlewares);
+
+    return this;
   }
 
   handle(ctx: WsContext) {
@@ -22,7 +24,7 @@ export class SocketEventsHandler {
     this.runMiddlewares(ctx, middlewares, 0);
   }
 
-  runMiddlewares(data: any, middlwares: MiddlewareFn[], index: number) {
+  runMiddlewares(data: WsContext, middlwares: MiddlewareFn[], index: number) {
     if (index >= middlwares.length) return;
 
     const middleware = middlwares[index];
@@ -30,7 +32,7 @@ export class SocketEventsHandler {
     if (!middleware) return;
 
     const next = (...middlewareArgs: any) => {
-      this.runMiddlewares(middlewareArgs, middlwares, index + 1);
+      this.runMiddlewares({ ...data, ...middlewareArgs }, middlwares, index + 1);
     };
 
     middleware(data, next);
