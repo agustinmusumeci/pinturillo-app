@@ -14,5 +14,5 @@ export enum Events {
 
 export interface WsEvent {
   event: Events;
-  payload: any;
+  data: any;
 }
