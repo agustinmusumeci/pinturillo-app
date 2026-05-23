@@ -12,7 +12,7 @@ export enum Events {
   END_GAME = "END_GAME",
 }
 
-export interface WsEvent {
+export interface WsPayload {
   event: Events;
   data: any;
 }

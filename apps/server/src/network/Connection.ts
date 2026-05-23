@@ -14,6 +14,10 @@ export class Connection {
     return this.session;
   }
 
+  getId(): string {
+    return this.id;
+  }
+
   send(data: any) {
     this.ws.send(data);
   }

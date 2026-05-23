@@ -1,12 +1,13 @@
 import type { WebSocket as WsWebSocket, WebSocketServer } from "ws";
 import { Connection } from "../network/Connection";
 import { randomUUID } from "node:crypto";
-import { Events, WsEvent } from "@pinturillo/shared/src/events";
+import { Events, WsPayload } from "@pinturillo/shared/src/events";
 import { Player } from "../domain/Player";
 import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
 import { GamesController } from "./GamesController";
-import { SocketEventsHandler } from "../helpers/SocketEventsHandler";
+import { SocketEventsHandler } from "../handlers/SocketEventsHandler";
+import { MiddlewareFn, WsContext } from "../types/middleware";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -20,202 +21,21 @@ export class ConnectionsController {
 
     wss.on("connection", (ws: WsWebSocket) => {
       const connectionId = randomUUID();
-      this.addConnection(connectionId, ws);
+      const connection = this.addConnection(connectionId, ws);
+
+      // Listen to events and define middleware execution order
+      this.eventsHandler
+        .on(Events.CREATE_PLAYER, [this.checkConnection, this.createPlayer])
+        .on(Events.CREATE_ROOM, [this.checkConnection, this.checkSession, this.createRoom])
+        .on(Events.JOIN_ROOM, [this.checkConnection, this.checkSession, this.joinRoom])
+        .on(Events.LEAVE_ROOM, [this.checkConnection, this.checkSession, this.leaveRoom])
+        .on(Events.START_GAME, [this.checkConnection, this.checkSession, this.startGame])
+        .on(Events.SELECT_WORD, [this.checkToken, this.checkConnection, this.checkSession, this.selectWord]);
 
       ws.on("message", (payload) => {
-        const { event, data } = JSON.parse(payload.toString()) as WsEvent;
+        const parsedPayload = JSON.parse(payload.toString()) as WsPayload;
 
-        switch (event) {
-          // Create a player and a player session after the socket connection is stablish
-          // Payload: {name: string}
-          case Events.CREATE_PLAYER: {
-            const playerName = data?.name;
-
-            const player = new Player(playerName);
-
-            // Add the player session to its socket connection
-            this.connections.get(connectionId)?.setSession(new PlayerSession(player, connectionId));
-
-            ws.send(JSON.stringify({ event: Events.CREATE_PLAYER, success: true }));
-
-            break;
-          }
-
-          // Create a room
-          // Payload: {name: string, maximumPlayers: number, drawTime: number, totalGames: number, roundsPerGame: number, privacy: string, password: string}
-          case Events.CREATE_ROOM: {
-            const { name, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password } = data;
-
-            const connection = this.connections.get(connectionId);
-
-            const hostPlayerSession = connection?.getSession();
-
-            if (!hostPlayerSession) {
-              // Send the NACK
-              ws.send(JSON.stringify({ event: Events.CREATE_ROOM, success: false }));
-              break;
-            }
-
-            roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
-
-            //Send the ACK
-            ws.send(JSON.stringify({ event: Events.CREATE_ROOM, success: true }));
-
-            break;
-          }
-
-          // Join a room
-          // Payload: {name: string, roomId: string}
-          case Events.JOIN_ROOM: {
-            const roomId = data?.roomId;
-
-            const connection = this.connections.get(connectionId);
-            const session = connection?.getSession();
-
-            if (!session || !roomId) {
-              // Send the NACK
-              ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: false }));
-              break;
-            }
-
-            const response = this.roomsController.joinRoom(roomId, session);
-
-            if (!response) {
-              // Send the NACK
-              ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: false }));
-              break;
-            }
-
-            // Send the ACK
-            ws.send(JSON.stringify({ event: Events.JOIN_ROOM, success: true, payload: { players: response.playerSessions.map((session) => session.getPlayer().getData()) } }));
-
-            const broadcastData = {
-              event: Events.JOIN_ROOM,
-              success: true,
-              data: { ...response, players: response.playerSessions.length },
-            };
-
-            // Broadcast to every connection on the room
-            this.broadcast(broadcastData, response.playerSessions);
-
-            break;
-          }
-
-          // Leave a room
-          case Events.LEAVE_ROOM: {
-            const connenction = this.connections.get(connectionId);
-
-            const session = connenction?.getSession();
-
-            if (!session || !connenction) break;
-
-            const response = roomsController.leaveRoom(session);
-
-            if (!response) {
-              // Send the NACK
-              ws.send(JSON.stringify({ event: Events.LEAVE_ROOM, success: false }));
-
-              break;
-            }
-
-            // Send the ACK
-            ws.send(JSON.stringify({ event: Events.LEAVE_ROOM, success: true }));
-
-            const broadcastData = {
-              event: Events.LEAVE_ROOM,
-              success: true,
-              data: { ...response, remainingSessions: response.remainingSessions.length },
-            };
-
-            // Broadcast to every connection on the room
-            this.broadcast(broadcastData, response.remainingSessions);
-
-            break;
-          }
-
-          // Start a new game
-          case Events.START_GAME: {
-            const connection = this.connections.get(connectionId);
-
-            if (!connection) {
-              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
-              break;
-            }
-
-            const session = connection.getSession();
-
-            if (!session) {
-              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
-              break;
-            }
-
-            const response = roomsController.startRoomGame(session);
-            const sessions = roomsController.getSessions(session);
-
-            if (!response || !sessions) {
-              ws.send(JSON.stringify({ event: Events.START_GAME, success: false }));
-              break;
-            }
-
-            const game = response.game;
-
-            this.gamesController.registerGameListener(game);
-
-            const broadcastData = {
-              event: Events.CREATE_ROOM,
-              sucess: true,
-              data: {
-                gameId: response.gameId,
-                drawTime: response.drawTime,
-                totalRounds: response.totalRounds,
-                players: response.players.map((session) => session.getPlayer().getData),
-              },
-            };
-
-            this.broadcast(broadcastData, sessions);
-
-            game.startGame();
-
-            break;
-          }
-
-          // Drawer select a word
-          // payload: {word: string, timestamp: string, token: string}
-          case Events.SELECT_WORD: {
-            if (!data?.token) {
-              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
-              break;
-            }
-
-            const connection = this.connections.get(connectionId);
-
-            if (!connection) {
-              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
-              break;
-            }
-
-            const session = connection.getSession();
-
-            if (!session) {
-              ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
-              break;
-            }
-
-            const gameId = this.roomsController.getGameId(session) ?? "";
-            const word = data?.word;
-            const emisionTimestamp = data?.timestamp / 60;
-            const currentTimestamp = Date.now() / 60;
-            const token = data?.token;
-
-            this.gamesController.selectWord(gameId, word, emisionTimestamp, currentTimestamp, token);
-
-            break;
-          }
-
-          default: {
-            break;
-          }
-        }
+        this.eventsHandler.handle({ connection: connection, ws: ws, payload: parsedPayload });
       });
 
       ws.on("close", () => {
@@ -238,23 +58,158 @@ export class ConnectionsController {
     return this.connections.delete(connectionId);
   }
 
-  private checkConnection(connectionId: string, ws: WsWebSocket, payload: any) {
-    const { event, data } = JSON.parse(payload.toString()) as WsEvent;
-
-    const connection = this.connections.get(connectionId);
-
-    if (!connection) {
-      ws.send(JSON.stringify({ event: event, success: false }));
+  private checkConnection: MiddlewareFn = (ctx, next) => {
+    if (!ctx.connection) {
+      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false }));
       return;
     }
 
-    const session = connection.getSession();
+    next();
+  };
+
+  private checkSession: MiddlewareFn = (ctx, next) => {
+    const session = ctx?.connection?.getSession();
 
     if (!session) {
-      ws.send(JSON.stringify({ event: event, success: false }));
+      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false }));
       return;
     }
-  }
+
+    next({ session: session });
+  };
+
+  private checkToken: MiddlewareFn = (ctx, next) => {
+    if (!ctx.payload?.data?.token) {
+      ctx.ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false }));
+      return;
+    }
+
+    next();
+  };
+
+  // Create a player and a player session after the socket connection is stablish
+  // Payload: {name: string}
+  private createPlayer: MiddlewareFn = (ctx) => {
+    const playerName = ctx.payload?.data?.name;
+
+    if (!playerName) {
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, message: "The player name can not be empty" }));
+      return;
+    }
+
+    const player = new Player(playerName);
+
+    const connection = ctx?.connection;
+    const connectionId = ctx?.connection?.getId();
+
+    // Add the player session to its socket connection
+    connection?.setSession(new PlayerSession(player, connectionId));
+
+    ctx.ws.send(JSON.stringify({ event: ctx?.payload?.event, success: true, message: "Player created succesfully" }));
+
+    return;
+  };
+
+  // Payload: {name: string, maximumPlayers: number, drawTime: number, totalGames: number, roundsPerGame: number, privacy: string, password: string}
+  private createRoom: MiddlewareFn = (ctx) => {
+    const hostPlayerSession = ctx?.session;
+    const { name, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password } = ctx?.payload?.data;
+
+    roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
+
+    //Send the ACK
+    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: true, message: "Room created succesfully" }));
+
+    return;
+  };
+
+  // Payload: {name: string, roomId: string}
+  private joinRoom: MiddlewareFn = (ctx) => {
+    const session = ctx?.session;
+    const roomId = ctx?.payload?.data?.roomId;
+
+    const response = this.roomsController.joinRoom(roomId, session);
+
+    if (!response) {
+      // Send the NACK
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false }));
+      return;
+    }
+
+    // Send the ACK
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, payload: { players: response.playerSessions.map((session) => session.getPlayer().getData()) } }));
+
+    const broadcastData = {
+      event: ctx.payload.event,
+      success: true,
+      data: { ...response, players: response.playerSessions.length },
+    };
+
+    // Broadcast to every connection on the room
+    this.broadcast(broadcastData, response.playerSessions);
+  };
+
+  private leaveRoom: MiddlewareFn = (ctx) => {
+    const response = roomsController.leaveRoom(ctx?.session);
+
+    if (!response) {
+      // Send the NACK
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false }));
+
+      return;
+    }
+
+    // Send the ACK
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, message: "Room leaved succesfully" }));
+
+    const broadcastData = {
+      event: ctx.payload.event,
+      success: true,
+      data: { ...response, remainingSessions: response.remainingSessions.length },
+    };
+
+    // Broadcast to every connection on the room
+    this.broadcast(broadcastData, response.remainingSessions);
+  };
+
+  private startGame: MiddlewareFn = (ctx) => {
+    const response = roomsController.startRoomGame(ctx?.session);
+    const sessions = roomsController.getSessions(ctx?.session);
+
+    if (!response || !sessions) {
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false }));
+      return;
+    }
+
+    const game = response.game;
+
+    this.gamesController.registerGameListener(game);
+
+    const broadcastData = {
+      event: ctx.payload.event,
+      sucess: true,
+      data: {
+        gameId: response.gameId,
+        drawTime: response.drawTime,
+        totalRounds: response.totalRounds,
+        players: response.players.map((session) => session.getPlayer().getData),
+      },
+    };
+
+    this.broadcast(broadcastData, sessions);
+
+    game.startGame();
+  };
+
+  private selectWord: MiddlewareFn = (ctx) => {
+    const gameId = this.roomsController.getGameId(ctx?.session) ?? "";
+    const word = ctx?.payload?.data?.word;
+    const emisionTimestamp = ctx?.payload?.data?.timestamp / 60;
+    const currentTimestamp = Date.now() / 60;
+    const token = ctx?.payload?.data?.token;
+
+    this.gamesController.selectWord(gameId, word, emisionTimestamp, currentTimestamp, token);
+  };
 
   broadcast(payload: any, hosts: PlayerSession[]) {
     for (const host of hosts) {

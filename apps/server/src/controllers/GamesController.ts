@@ -46,19 +46,19 @@ export class GamesController {
   selectWord(gameId: string, word: string, emisionTimestamp: number, currentTimestamp: number, token: string) {
     const game = this.games.get(gameId);
 
-    if (!game) return null;
+    if (!game) return false;
 
     // Check if the time taked to select a word is valid
     if (currentTimestamp - emisionTimestamp > DefaultSelectTime) {
       game.timeOut();
-      return null;
+      return false;
     }
 
     const gameToken = game.getToken();
 
     // Check if the user who sent the event is the currentDrawer
     if (gameToken !== token) {
-      return null;
+      return false;
     }
 
     game.selectWord(word);

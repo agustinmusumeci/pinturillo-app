@@ -1,7 +1,5 @@
-import { Events, WsEvent } from "@pinturillo/shared/src/events";
-import { WsContext } from "@pinturillo/shared/src/contexts";
-
-export type MiddlewareFn = (data: any, next: (...args: any) => void) => void;
+import { Events } from "@pinturillo/shared/src/events";
+import { MiddlewareFn, WsContext } from "../types/middleware";
 
 export class SocketEventsHandler {
   private events = new Map<Events, MiddlewareFn[]>();
@@ -13,7 +11,7 @@ export class SocketEventsHandler {
   }
 
   handle(ctx: WsContext) {
-    const { event } = JSON.parse(ctx.payload.toString()) as WsEvent;
+    const { event } = ctx?.payload;
 
     if (!event) return;
 

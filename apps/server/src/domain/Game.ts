@@ -140,10 +140,17 @@ export class Game extends EventEmitter {
     return this.id;
   }
 
+  // If the player does not select a word in the stipulated time, the system select the first option as the word to draw
   timeOut() {
     this.emit(Events.SELECT_TIMEOUT, this.players, { timeout: true });
 
-    this.setUpRound();
+    const automaticWord = this.optionWords.at(0);
+
+    if (automaticWord) {
+      this.selectWord(automaticWord);
+    } else {
+      this.setUpRound();
+    }
   }
 
   emit(event: Events, sessions: PlayerSession[], data: any): boolean {
