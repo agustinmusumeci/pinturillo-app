@@ -20,7 +20,7 @@ All the broadcast will include the following structure:
 
 The "data" attribute in broadcast response vary depending the Event:
 
-#### Room Broadcast
+#### Room Broadcast Data
 
 - JOIN_ROOM Event broadcast:
 
@@ -42,7 +42,7 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
-#### Game Broadcast
+#### Game Broadcast Data
 
 - START_GAME Event broadcast:
 

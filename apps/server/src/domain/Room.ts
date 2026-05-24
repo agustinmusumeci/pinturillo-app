@@ -112,7 +112,7 @@ export class Room {
       if (currentDrawer && currentDrawer.getPlayer().getData().id === playerId) {
         // Update the players and set up the round
         game.removePlayer(playerId);
-        game.setUpRound();
+        game.setUp();
 
         response["newDrawerPlayerId"] = playerId;
       }

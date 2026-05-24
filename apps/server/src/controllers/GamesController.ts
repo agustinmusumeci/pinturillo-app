@@ -42,6 +42,12 @@ export class GamesController {
 
       this.broadcast(payload, sessions);
     });
+
+    game.on(Events.DRAW, (sessions: PlayerSession[], data: { point: Point }) => {
+      const payload = { event: Events.DRAW, data: data, success: true };
+
+      this.broadcast(payload, sessions);
+    });
   }
 
   selectWord(gameId: string, word: string, emisionTimestamp: number, currentTimestamp: number, token: string) {
@@ -51,7 +57,7 @@ export class GamesController {
 
     // Check if the time taked to select a word is valid
     if (currentTimestamp - emisionTimestamp > DefaultSelectTime) {
-      game.timeOut();
+      game.selectWordTimeOut();
       return false;
     }
 

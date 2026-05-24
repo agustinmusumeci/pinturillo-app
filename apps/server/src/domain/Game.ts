@@ -4,7 +4,7 @@ import { Player } from "./Player";
 import { PlayerSession } from "./PlayerSession";
 import { randomUUID, randomInt } from "node:crypto";
 import { Events } from "@pinturillo/shared/src/events";
-import { DefaultSelectTime, DrawOptions } from "@pinturillo/shared/src/constants";
+import { DefaultDrawTime, DefaultSelectTime, DrawOptions } from "@pinturillo/shared/src/constants";
 import { Point } from "@pinturillo/shared/src/interfaces/point";
 
 export class Game extends EventEmitter {
@@ -23,6 +23,8 @@ export class Game extends EventEmitter {
   private hasDrawnPlayers: { id: string; name: string }[];
   private board: Point[];
   private guesses: Guess[];
+  private selectWordInterval: NodeJS.Timeout | null;
+  private drawInterval: NodeJS.Timeout | null;
 
   constructor(players: PlayerSession[], drawTime: number, totalRounds: number) {
     super();
@@ -42,14 +44,21 @@ export class Game extends EventEmitter {
     this.hasDrawnPlayers = [];
     this.board = [];
     this.guesses = [];
+    this.selectWordInterval = null;
+    this.drawInterval = null;
   }
 
   startGame() {
     // Set up game variables
-    this.setUpRound();
+    this.setUp();
   }
 
-  setUpRound() {
+  setUp() {
+    if (this.drawInterval) {
+      clearInterval(this.drawInterval);
+      this.drawInterval = null;
+    }
+
     // Add the players that joined when a round was in process
     this.addPendingPlayers();
 
@@ -74,8 +83,13 @@ export class Game extends EventEmitter {
         // Emit to the drawer, the word options, timestamp of emition and token for validating
         this.currentToken = randomUUID();
         this.emit(Events.NOTIFY_DRAWER, [this.currentDrawer], { optionWords: this.optionWords, selectTime: DefaultSelectTime, timestamp: Date.now(), token: this.currentToken });
+        this.handleSelectWordInterval();
       }
     }
+  }
+
+  private startRound() {
+    this.handleDrawInterval();
   }
 
   private selectDrawer() {
@@ -147,7 +161,14 @@ export class Game extends EventEmitter {
   selectWord(word: string) {
     this.currentWord = word;
 
+    if (this.selectWordInterval) {
+      clearInterval(this.selectWordInterval);
+      this.selectWordInterval = null;
+    }
+
     this.emit(Events.START_DRAW, this.players, { drawTime: this.drawTime, wordLength: word.length });
+
+    this.startRound();
   }
 
   getId(): string {
@@ -155,15 +176,20 @@ export class Game extends EventEmitter {
   }
 
   // If the player does not select a word in the stipulated time, the system select the first option as the word to draw
-  timeOut() {
+  selectWordTimeOut() {
     this.emit(Events.SELECT_TIMEOUT, this.players, { timeout: true });
 
     const automaticWord = this.optionWords.at(0);
 
+    if (this.selectWordInterval) {
+      clearInterval(this.selectWordInterval);
+      this.selectWordInterval = null;
+    }
+
     if (automaticWord) {
       this.selectWord(automaticWord);
     } else {
-      this.setUpRound();
+      this.setUp();
     }
   }
 
@@ -193,6 +219,18 @@ export class Game extends EventEmitter {
     });
 
     this.players = newPlayers;
+  }
+
+  handleSelectWordInterval() {
+    this.selectWordInterval = setInterval(() => {
+      this.selectWordTimeOut();
+    }, DefaultSelectTime);
+  }
+
+  handleDrawInterval() {
+    this.drawInterval = setInterval(() => {
+      this.setUp();
+    }, DefaultDrawTime);
   }
 
   emit(event: Events, sessions: PlayerSession[], data: any): boolean {
