@@ -38,10 +38,16 @@ export class ConnectionsController {
         this.eventsHandler.handle({ connection: connection, ws: ws, payload: parsedPayload });
       });
 
+      ws.on("pong", () => {
+        connection.setIsAlive(true);
+      });
+
       ws.on("close", () => {
         this.removeConnection(connectionId);
       });
     });
+
+    this.heartBeat();
   }
 
   private addConnection(connectionId: string, ws: WsWebSocket): Connection {
@@ -221,5 +227,22 @@ export class ConnectionsController {
 
       conn?.send(payload);
     }
+  }
+
+  heartBeat() {
+    return setInterval(() => {
+      Object.values(this.connections).forEach((connection: Connection) => {
+        const ws = connection.getSocket();
+        const isAlive = connection.getIsAlive();
+
+        if (!isAlive) {
+          ws.terminate();
+          return;
+        }
+
+        connection.setIsAlive(false);
+        ws.ping();
+      });
+    }, 30_000);
   }
 }
