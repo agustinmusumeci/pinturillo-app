@@ -165,8 +165,28 @@ export class Game extends EventEmitter {
     this.board = [];
   }
 
-  updatePlayers(players: PlayerSession[]) {
-    this.players = players;
+  addPlayer(session: PlayerSession, isPending: boolean) {
+    if (isPending) {
+      this.pendingPlayers.push(session);
+    } else {
+      this.players.push(session);
+    }
+  }
+
+  removePlayer(playerId: string) {
+    // Remove the player
+    const newPlayers = this.players.filter((session) => {
+      const player = session.getPlayer();
+      const data = player.getData();
+
+      if (data.id === playerId) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    this.players = newPlayers;
   }
 
   emit(event: Events, sessions: PlayerSession[], data: any): boolean {

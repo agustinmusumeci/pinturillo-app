@@ -60,6 +60,14 @@ export class Room {
 
   joinRoom(session: PlayerSession) {
     this.playerSessions.push(session);
+
+    if (this.currentGame) {
+      if (this.status === RoomStatus.CREATED) {
+        this.currentGame.addPlayer(session, false);
+      } else {
+        this.currentGame.addPlayer(session, true);
+      }
+    }
   }
 
   leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } {
@@ -103,7 +111,7 @@ export class Room {
 
       if (currentDrawer && currentDrawer.getPlayer().getData().id === playerId) {
         // Update the players and set up the round
-        game.updatePlayers(filteredPlayerSessiones);
+        game.removePlayer(playerId);
         game.setUpRound();
 
         response["newDrawerPlayerId"] = playerId;
@@ -116,6 +124,7 @@ export class Room {
   createGame(): { game: Game; gameId: string; drawTime: number; totalRounds: number; players: PlayerSession[] } | null {
     const game = new Game(this.playerSessions, this.drawTime, this.roundsPerGame);
 
+    this.status = RoomStatus.PLAYING;
     this.currentGame = game;
 
     return {
