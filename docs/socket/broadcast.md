@@ -38,6 +38,7 @@ The "data" attribute in broadcast response vary depending the Event:
     removedPlayerId: String
     hostPlayerId?: String
     playersSession: Number
+    newDrawerPlayerId?: String
 }
 ```
 
