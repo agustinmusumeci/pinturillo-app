@@ -49,9 +49,11 @@ export class Game extends EventEmitter {
     this.setUpRound();
   }
 
-  private setUpRound() {
-    // Add the pending to join players
+  setUpRound() {
+    // Add the players that joined when a round was in process
     this.addPendingPlayers();
+
+    this.clearBoard();
 
     // Select the new drawer and pass round if all players had drawn
     this.selectDrawer();
@@ -77,6 +79,8 @@ export class Game extends EventEmitter {
   }
 
   private selectDrawer() {
+    this.currentDrawer = null;
+
     for (let player of this.players) {
       const { id } = player.getPlayer().getData();
 
@@ -130,6 +134,10 @@ export class Game extends EventEmitter {
     return this.currentToken;
   }
 
+  getCurrentDrawer() {
+    return this.currentDrawer;
+  }
+
   selectWord(word: string) {
     this.currentWord = word;
 
@@ -151,6 +159,14 @@ export class Game extends EventEmitter {
     } else {
       this.setUpRound();
     }
+  }
+
+  clearBoard() {
+    this.board = [];
+  }
+
+  updatePlayers(players: PlayerSession[]) {
+    this.players = players;
   }
 
   emit(event: Events, sessions: PlayerSession[], data: any): boolean {

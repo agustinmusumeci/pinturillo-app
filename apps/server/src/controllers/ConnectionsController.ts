@@ -7,7 +7,7 @@ import roomsController from "./RoomsControllers";
 import { PlayerSession } from "../domain/PlayerSession";
 import { GamesController } from "./GamesController";
 import { SocketEventsHandler } from "../handlers/SocketEventsHandler";
-import { MiddlewareFn, WsContext } from "../types/middleware";
+import { MiddlewareFn } from "../types/middleware";
 
 export class ConnectionsController {
   private wss: WebSocketServer;

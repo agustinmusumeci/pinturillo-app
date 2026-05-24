@@ -62,8 +62,8 @@ export class Room {
     this.playerSessions.push(session);
   }
 
-  leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } {
-    let response: { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[] } = {
+  leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } {
+    let response: { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } = {
       removedPlayerId: playerId,
       remainingSessions: [],
     };
@@ -92,6 +92,21 @@ export class Room {
       if (newHost) {
         this.hostPlayer = newHost;
         response["hostPlayerId"] = newHost.getPlayer().getData().id;
+      }
+    }
+
+    // If the game is in process and the player that leave is the drawer, select a new drawer
+    if (this.currentGame) {
+      const game = this.currentGame;
+
+      const currentDrawer = game.getCurrentDrawer();
+
+      if (currentDrawer && currentDrawer.getPlayer().getData().id === playerId) {
+        // Update the players and set up the round
+        game.updatePlayers(filteredPlayerSessiones);
+        game.setUpRound();
+
+        response["newDrawerPlayerId"] = playerId;
       }
     }
 

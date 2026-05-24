@@ -39,7 +39,7 @@ export class RoomsControllers {
     return response;
   }
 
-  leaveRoom(session: PlayerSession): { removedPlayerId: string; newHostId?: string; remainingSessions: PlayerSession[] } | null {
+  leaveRoom(session: PlayerSession): { removedPlayerId: string; newHostId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } | null {
     const player = session.getPlayer();
     const data = player.getData();
 
