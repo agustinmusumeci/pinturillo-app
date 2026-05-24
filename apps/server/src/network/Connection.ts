@@ -24,19 +24,23 @@ export class Connection {
     return this.isAlive;
   }
 
-  getSocket() {
-    return this.ws;
-  }
-
-  send(data: any) {
-    this.ws.send(data);
-  }
-
   setSession(session: PlayerSession) {
     this.session = session;
   }
 
   setIsAlive(value: boolean) {
     this.isAlive = value;
+  }
+
+  send(data: any) {
+    this.ws.send(data);
+  }
+
+  ping() {
+    this.ws.ping();
+  }
+
+  disconnect() {
+    this.ws.terminate();
   }
 }

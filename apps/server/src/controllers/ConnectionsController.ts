@@ -8,6 +8,7 @@ import { PlayerSession } from "../domain/PlayerSession";
 import { GamesController } from "./GamesController";
 import { SocketEventsHandler } from "../handlers/SocketEventsHandler";
 import { MiddlewareFn } from "../types/middleware";
+import { HeartbeatInterval } from "../constants/heartbeat";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -232,17 +233,23 @@ export class ConnectionsController {
   heartBeat() {
     return setInterval(() => {
       Object.values(this.connections).forEach((connection: Connection) => {
-        const ws = connection.getSocket();
         const isAlive = connection.getIsAlive();
 
         if (!isAlive) {
-          ws.terminate();
+          connection.disconnect();
+
+          const session = connection.getSession();
+
+          if (session) {
+            this.roomsController.leaveRoom(session);
+          }
+
           return;
         }
 
         connection.setIsAlive(false);
-        ws.ping();
+        connection.ping();
       });
-    }, 30_000);
+    }, HeartbeatInterval);
   }
 }
