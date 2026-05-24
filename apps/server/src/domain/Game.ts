@@ -2,10 +2,10 @@ import { EventEmitter } from "node:events";
 import { Guess } from "./Guess";
 import { Player } from "./Player";
 import { PlayerSession } from "./PlayerSession";
-import { Trace } from "./Trace";
 import { randomUUID, randomInt } from "node:crypto";
 import { Events } from "@pinturillo/shared/src/events";
 import { DefaultSelectTime, DrawOptions } from "@pinturillo/shared/src/constants";
+import { Point } from "@pinturillo/shared/src/interfaces/point";
 
 export class Game extends EventEmitter {
   private id: string;
@@ -21,7 +21,7 @@ export class Game extends EventEmitter {
   private currentRound: number;
   private totalRounds: number;
   private hasDrawnPlayers: { id: string; name: string }[];
-  private board: Trace[];
+  private board: Point[];
   private guesses: Guess[];
 
   constructor(players: PlayerSession[], drawTime: number, totalRounds: number) {
@@ -128,6 +128,12 @@ export class Game extends EventEmitter {
 
   private nextRound() {
     this.currentRound += 1;
+  }
+
+  draw(point: Point) {
+    this.board.push(point);
+
+    this.emit(Events.DRAW, this.players, { point: point });
   }
 
   getToken(): string {

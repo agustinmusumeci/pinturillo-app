@@ -2,6 +2,7 @@ import { Events } from "@pinturillo/shared/src/events";
 import { Game } from "../domain/Game";
 import { PlayerSession } from "../domain/PlayerSession";
 import { DefaultSelectTime } from "@pinturillo/shared/src/constants";
+import { Point } from "@pinturillo/shared/src/interfaces/point";
 
 export class GamesController {
   private games: Map<string, Game> = new Map();
@@ -64,5 +65,20 @@ export class GamesController {
     game.selectWord(word);
 
     return true;
+  }
+
+  draw(gameId: string, point: Point, token: string) {
+    const game = this.games.get(gameId);
+
+    if (!game) return false;
+
+    const gameToken = game.getToken();
+
+    // Check if the user who sent the event is the currentDrawer
+    if (gameToken !== token) {
+      return false;
+    }
+
+    game.draw(point);
   }
 }

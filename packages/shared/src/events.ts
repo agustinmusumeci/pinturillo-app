@@ -9,6 +9,7 @@ export enum Events {
   SELECT_WORD = "SELECT_WORD",
   SELECT_TIMEOUT = "SELECT_TIMEOUT",
   START_DRAW = "START_DRAW",
+  DRAW = "DRAW",
   END_GAME = "END_GAME",
 }
 

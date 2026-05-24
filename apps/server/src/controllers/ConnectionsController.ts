@@ -9,6 +9,7 @@ import { GamesController } from "./GamesController";
 import { SocketEventsHandler } from "../handlers/SocketEventsHandler";
 import { MiddlewareFn } from "../types/middleware";
 import { HeartbeatInterval } from "../constants/heartbeat";
+import { Point } from "@pinturillo/shared/src/interfaces/point";
 
 export class ConnectionsController {
   private wss: WebSocketServer;
@@ -31,7 +32,8 @@ export class ConnectionsController {
         .on(Events.JOIN_ROOM, [this.checkConnection, this.checkSession, this.joinRoom])
         .on(Events.LEAVE_ROOM, [this.checkConnection, this.checkSession, this.leaveRoom])
         .on(Events.START_GAME, [this.checkConnection, this.checkSession, this.startGame])
-        .on(Events.SELECT_WORD, [this.checkToken, this.checkConnection, this.checkSession, this.selectWord]);
+        .on(Events.SELECT_WORD, [this.checkToken, this.checkConnection, this.checkSession, this.selectWord])
+        .on(Events.DRAW, [this.checkToken, this.checkConnection, this.checkSession, this.draw]);
 
       ws.on("message", (payload) => {
         const parsedPayload = JSON.parse(payload.toString()) as WsPayload;
@@ -216,6 +218,14 @@ export class ConnectionsController {
     const token = ctx?.payload?.data?.token;
 
     this.gamesController.selectWord(gameId, word, emisionTimestamp, currentTimestamp, token);
+  };
+
+  private draw: MiddlewareFn = (ctx) => {
+    const gameId = this.roomsController.getGameId(ctx?.session) ?? "";
+    const token = ctx?.payload?.data?.token;
+    const point = ctx?.payload?.data?.point as Point;
+
+    this.gamesController.draw(gameId, point, token);
   };
 
   broadcast(payload: any, hosts: PlayerSession[]) {
