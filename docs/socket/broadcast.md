@@ -85,4 +85,12 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
+- DRAW Event broadcast:
+
+```
+{
+    point: {x: Number, y: Number, color: String, width: Number}
+}
+```
+
 - SELECT_TIMEOUT Event does not have custom "data" attribute
