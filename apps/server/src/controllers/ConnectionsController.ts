@@ -33,7 +33,8 @@ export class ConnectionsController {
         .on(Events.LEAVE_ROOM, [this.checkConnection, this.checkSession, this.leaveRoom])
         .on(Events.START_GAME, [this.checkConnection, this.checkSession, this.startGame])
         .on(Events.SELECT_WORD, [this.checkToken, this.checkConnection, this.checkSession, this.selectWord])
-        .on(Events.DRAW, [this.checkToken, this.checkConnection, this.checkSession, this.draw]);
+        .on(Events.DRAW, [this.checkToken, this.checkConnection, this.checkSession, this.draw])
+        .on(Events.GUESS_WORD, [this.checkConnection, this.checkSession]);
 
       ws.on("message", (payload) => {
         const parsedPayload = JSON.parse(payload.toString()) as WsPayload;
@@ -222,10 +223,23 @@ export class ConnectionsController {
 
   private draw: MiddlewareFn = (ctx) => {
     const gameId = this.roomsController.getGameId(ctx?.session) ?? "";
+
     const token = ctx?.payload?.data?.token;
     const point = ctx?.payload?.data?.point as Point;
 
     this.gamesController.draw(gameId, point, token);
+  };
+
+  private guess: MiddlewareFn = (ctx) => {
+    const session = ctx?.session;
+    const gameId = this.roomsController.getGameId(session) ?? "";
+
+    const player = session?.getPlayer()?.getData();
+    const id = player?.id;
+
+    const guess = ctx?.payload?.data?.guess;
+
+    this.gamesController.guess(gameId, session, guess);
   };
 
   broadcast(payload: any, hosts: PlayerSession[]) {

@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
-import { Guess } from "./Guess";
 import { Player } from "./Player";
 import { PlayerSession } from "./PlayerSession";
 import { randomUUID, randomInt } from "node:crypto";
 import { Events } from "@pinturillo/shared/src/events";
 import { DefaultDrawTime, DefaultSelectTime, DrawOptions } from "@pinturillo/shared/src/constants";
 import { Point } from "@pinturillo/shared/src/interfaces/point";
+import { Guess } from "@pinturillo/shared/src/interfaces/guess";
 
 export class Game extends EventEmitter {
   private id: string;
@@ -25,6 +25,7 @@ export class Game extends EventEmitter {
   private guesses: Guess[];
   private selectWordInterval: NodeJS.Timeout | null;
   private drawInterval: NodeJS.Timeout | null;
+  private startDrawTimestamp: number | null;
 
   constructor(players: PlayerSession[], drawTime: number, totalRounds: number) {
     super();
@@ -46,6 +47,7 @@ export class Game extends EventEmitter {
     this.guesses = [];
     this.selectWordInterval = null;
     this.drawInterval = null;
+    this.startDrawTimestamp = null;
   }
 
   startGame() {
@@ -59,8 +61,17 @@ export class Game extends EventEmitter {
       this.drawInterval = null;
     }
 
+    this.startDrawTimestamp = null;
+
     // Add the players that joined when a round was in process
     this.addPendingPlayers();
+
+    // Clear the players "hasGuessed" var
+    this.players.forEach((session) => {
+      const player = session.getPlayer();
+
+      player.setHasGuessed(false);
+    });
 
     this.clearBoard();
 
@@ -150,6 +161,32 @@ export class Game extends EventEmitter {
     this.emit(Events.DRAW, this.players, { point: point });
   }
 
+  guess(guess: Guess) {
+    const word = guess.word;
+
+    if (word.toLowerCase() === this.currentWord.toLowerCase()) {
+      const timestamp = guess.timestamp;
+      const points = this.calculatePoints(timestamp);
+
+      const player = this.players.find((player) => player.getPlayer().getData().id === guess.player.id)?.getPlayer();
+
+      player?.addPoints(points);
+      player?.setHasGuessed(true);
+
+      this.emit(Events.GUESS_WORD, this.players, { player: guess.player, points: points });
+    }
+  }
+
+  // Define the points a player gets as the remaining time he has
+  calculatePoints(timestamp: number) {
+    if (!this.startDrawTimestamp) return 0;
+
+    // Remaining time
+    const timeDelta = (this.drawTime - (timestamp - this.startDrawTimestamp)) * 60;
+
+    return timeDelta;
+  }
+
   getToken(): string {
     return this.currentToken;
   }
@@ -167,6 +204,8 @@ export class Game extends EventEmitter {
     }
 
     this.emit(Events.START_DRAW, this.players, { drawTime: this.drawTime, wordLength: word.length });
+
+    this.startDrawTimestamp = Date.now();
 
     this.startRound();
   }

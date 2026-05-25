@@ -3,6 +3,7 @@ import { Game } from "../domain/Game";
 import { PlayerSession } from "../domain/PlayerSession";
 import { DefaultSelectTime } from "@pinturillo/shared/src/constants";
 import { Point } from "@pinturillo/shared/src/interfaces/point";
+import { Guess } from "@pinturillo/shared/src/interfaces/guess";
 
 export class GamesController {
   private games: Map<string, Game> = new Map();
@@ -48,6 +49,12 @@ export class GamesController {
 
       this.broadcast(payload, sessions);
     });
+
+    game.on(Events.GUESS_WORD, (sessions: PlayerSession[], data: { player: { id: string; name: string }; points: number }) => {
+      const payload = { event: Events.DRAW, data: data, success: true };
+
+      this.broadcast(payload, sessions);
+    });
   }
 
   selectWord(gameId: string, word: string, emisionTimestamp: number, currentTimestamp: number, token: string) {
@@ -86,5 +93,22 @@ export class GamesController {
     }
 
     game.draw(point);
+  }
+
+  guess(gameId: string, session: PlayerSession, word: string) {
+    const game = this.games.get(gameId);
+
+    if (!game) return false;
+
+    const guess = {
+      player: {
+        id: session?.getPlayer()?.getData()?.id,
+        name: session?.getPlayer()?.getData()?.name,
+      },
+      word: word,
+      timestamp: Date.now(),
+    } as Guess;
+
+    game.guess(guess);
   }
 }
