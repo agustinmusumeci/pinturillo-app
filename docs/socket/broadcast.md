@@ -93,12 +93,21 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
-- GUESS_WORD Event broadcast:
+- Correct GUESS_WORD Event broadcast:
 
 ```
 {
     player: {id: string, name: string},
     score: number
+}
+```
+
+- Incorrect GUESS_WORD Event broadcast:
+
+```
+{
+    player: {id: string, name: string},
+    word: string
 }
 ```
 

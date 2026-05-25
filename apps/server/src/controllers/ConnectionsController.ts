@@ -147,16 +147,16 @@ export class ConnectionsController {
     }
 
     // Send the ACK
-    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, payload: { players: response.playerSessions.map((session) => session.getPlayer().getData()) } }));
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, payload: { players: response.players } }));
 
     const broadcastData = {
       event: ctx.payload.event,
       success: true,
-      data: { ...response, players: response.playerSessions.length },
+      data: { newPlayer: response.players.find((player) => player.id === response.newPlayerId) },
     };
 
     // Broadcast to every connection on the room
-    this.broadcast(broadcastData, response.playerSessions);
+    this.broadcast(broadcastData, response.sessions);
   };
 
   private leaveRoom: MiddlewareFn = (ctx) => {

@@ -176,6 +176,8 @@ export class Game extends EventEmitter {
       this.emit(Events.GUESS_WORD, this.players, { player: guess.player, score: score });
 
       return { hasGuessed: true, score: score };
+    } else {
+      this.emit(Events.GUESS_WORD, this.players, { player: guess.player, word: word });
     }
 
     return { hasGuessed: false };

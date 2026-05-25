@@ -20,7 +20,7 @@ export class RoomsControllers {
     return room;
   }
 
-  joinRoom(roomId: string, session: PlayerSession): { newPlayerId: string; playerSessions: PlayerSession[] } | null {
+  joinRoom(roomId: string, session: PlayerSession): { newPlayerId: string; players: { id: string; name: string; score: number; hasGuessed?: boolean }[]; sessions: PlayerSession[] } | null {
     let room = this.rooms.get(roomId);
 
     if (!room) {
@@ -33,7 +33,8 @@ export class RoomsControllers {
 
     let response = {
       newPlayerId: session.getPlayer().getData().id,
-      playerSessions: playerSessions,
+      players: playerSessions.map((session) => session.getPlayer().getData()),
+      sessions: playerSessions,
     };
 
     return response;
