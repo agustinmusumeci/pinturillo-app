@@ -50,7 +50,7 @@ export class GamesController {
       this.broadcast(payload, sessions);
     });
 
-    game.on(Events.GUESS_WORD, (sessions: PlayerSession[], data: { player: { id: string; name: string }; points: number }) => {
+    game.on(Events.GUESS_WORD, (sessions: PlayerSession[], data: { player: { id: string; name: string }; score: number }) => {
       const payload = { event: Events.DRAW, data: data, success: true };
 
       this.broadcast(payload, sessions);

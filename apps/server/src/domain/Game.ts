@@ -166,14 +166,14 @@ export class Game extends EventEmitter {
 
     if (word.toLowerCase() === this.currentWord.toLowerCase()) {
       const timestamp = guess.timestamp;
-      const points = this.calculatePoints(timestamp);
+      const score = this.calculatePoints(timestamp);
 
       const player = this.players.find((player) => player.getPlayer().getData().id === guess.player.id)?.getPlayer();
 
-      player?.addPoints(points);
+      player?.addScore(score);
       player?.setHasGuessed(true);
 
-      this.emit(Events.GUESS_WORD, this.players, { player: guess.player, points: points });
+      this.emit(Events.GUESS_WORD, this.players, { player: guess.player, score: score });
     }
   }
 
