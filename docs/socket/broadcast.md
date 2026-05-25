@@ -93,4 +93,13 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
+- GUESS_WORD Event broadcast:
+
+```
+{
+    player: {id: string, name: string},
+    score: number
+}
+```
+
 - SELECT_TIMEOUT Event does not have custom "data" attribute
