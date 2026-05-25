@@ -109,6 +109,14 @@ export class GamesController {
       timestamp: Date.now(),
     } as Guess;
 
-    game.guess(guess);
+    const response = game.guess(guess);
+
+    if (response.hasGuessed) {
+      this.broadcast(JSON.stringify({ event: Events.GUESS_WORD, success: true, data: { score: response.score } }), [session]);
+    } else {
+      this.broadcast(JSON.stringify({ event: Events.GUESS_WORD, success: false }), [session]);
+    }
+
+    return response;
   }
 }

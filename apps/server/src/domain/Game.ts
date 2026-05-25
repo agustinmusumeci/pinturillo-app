@@ -161,7 +161,7 @@ export class Game extends EventEmitter {
     this.emit(Events.DRAW, this.players, { point: point });
   }
 
-  guess(guess: Guess) {
+  guess(guess: Guess): { hasGuessed: boolean; score?: number } {
     const word = guess.word;
 
     if (word.toLowerCase() === this.currentWord.toLowerCase()) {
@@ -174,7 +174,11 @@ export class Game extends EventEmitter {
       player?.setHasGuessed(true);
 
       this.emit(Events.GUESS_WORD, this.players, { player: guess.player, score: score });
+
+      return { hasGuessed: true, score: score };
     }
+
+    return { hasGuessed: false };
   }
 
   // Define the points a player gets as the remaining time he has

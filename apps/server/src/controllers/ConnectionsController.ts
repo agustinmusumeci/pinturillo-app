@@ -34,7 +34,7 @@ export class ConnectionsController {
         .on(Events.START_GAME, [this.checkConnection, this.checkSession, this.startGame])
         .on(Events.SELECT_WORD, [this.checkToken, this.checkConnection, this.checkSession, this.selectWord])
         .on(Events.DRAW, [this.checkToken, this.checkConnection, this.checkSession, this.draw])
-        .on(Events.GUESS_WORD, [this.checkConnection, this.checkSession]);
+        .on(Events.GUESS_WORD, [this.checkConnection, this.checkSession, this.guess]);
 
       ws.on("message", (payload) => {
         const parsedPayload = JSON.parse(payload.toString()) as WsPayload;
@@ -234,12 +234,9 @@ export class ConnectionsController {
     const session = ctx?.session;
     const gameId = this.roomsController.getGameId(session) ?? "";
 
-    const player = session?.getPlayer()?.getData();
-    const id = player?.id;
-
     const guess = ctx?.payload?.data?.guess;
 
-    this.gamesController.guess(gameId, session, guess);
+    this.gamesController.guess(gameId, guess, session);
   };
 
   broadcast(payload: any, hosts: PlayerSession[]) {
