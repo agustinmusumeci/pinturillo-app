@@ -26,8 +26,7 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    newPlayerId: String
-    playersSession: Number
+    newPlayerId: {id: String, name: String, score: Number, hasGuessed?: Boolean}
 }
 ```
 
