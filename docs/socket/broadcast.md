@@ -110,4 +110,12 @@ The "data" attribute in broadcast response vary depending the Event:
 }
 ```
 
+- END_GAME Event broadcast:
+
+```
+{
+    winners: {id: string, name: string, score: number, hasGuessed: boolean, winGames: number}
+}
+```
+
 - SELECT_TIMEOUT Event does not have custom "data" attribute
