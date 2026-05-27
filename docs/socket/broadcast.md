@@ -96,7 +96,7 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    player: {id: string, name: string},
+    player: {id: String, name: String},
     score: number
 }
 ```
@@ -105,8 +105,17 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    player: {id: string, name: string},
-    word: string
+    player: {id: String, name: String},
+    word: String
+}
+```
+
+- END_DRAW Event broadcast:
+
+```
+{
+    timeout: Boolean
+    messsage: String
 }
 ```
 
@@ -114,7 +123,7 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    winners: {id: string, name: string, score: number, hasGuessed: boolean, winGames: number}
+    winners: {id: String, name: String, score: number, hasGuessed: boolean, winGames: number}
 }
 ```
 
