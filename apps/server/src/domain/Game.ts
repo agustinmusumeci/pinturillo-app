@@ -66,11 +66,12 @@ export class Game extends EventEmitter {
     // Add the players that joined when a round was in process
     this.addPendingPlayers();
 
-    // Clear the players "hasGuessed" var
+    // Clear the players "hasGuessed" var and restart players score
     this.players.forEach((session) => {
       const player = session.getPlayer();
 
       player.setHasGuessed(false);
+      player.restarScore();
     });
 
     this.clearBoard();
@@ -79,8 +80,16 @@ export class Game extends EventEmitter {
     this.selectDrawer();
 
     if (this.totalRounds >= this.currentRound) {
+      // Select the winner
+      const winners = this.calculateWinners();
+
+      // Add one game winned in the player
+      for (const winner of winners) {
+        winner.getPlayer().addWinGame();
+      }
+
       // Broadcast that the game have just finished
-      this.emit(Events.END_GAME, this.players, {});
+      this.emit(Events.END_GAME, this.players, { winners: winners.map((winner) => winner.getPlayer().getData()) });
     } else {
       this.selectWords();
       if (this.currentDrawer) {
@@ -153,6 +162,25 @@ export class Game extends EventEmitter {
 
   private nextRound() {
     this.currentRound += 1;
+  }
+
+  // Calculate the winner of the game
+  // In case of tie, both players will
+  private calculateWinners() {
+    let winners = [];
+    let maxPoints = 0;
+
+    for (const session of this.players) {
+      const player = session.getPlayer();
+      const { score } = player.getData();
+
+      if (score >= maxPoints) {
+        maxPoints = score;
+        winners.push(session);
+      }
+    }
+
+    return winners;
   }
 
   draw(point: Point) {

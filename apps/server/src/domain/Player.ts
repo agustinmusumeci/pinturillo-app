@@ -15,15 +15,23 @@ export class Player {
     this.winGames = 0;
   }
 
-  getData(): { id: string; name: string; score: number; hasGuessed: boolean } {
-    return { id: this.id, name: this.name, score: this.score, hasGuessed: this.hasGuessed };
+  getData(): { id: string; name: string; score: number; hasGuessed: boolean; winGames: number } {
+    return { id: this.id, name: this.name, score: this.score, hasGuessed: this.hasGuessed, winGames: this.winGames };
   }
 
   addScore(score: number) {
     this.score += score;
   }
 
+  restarScore() {
+    this.score = 0;
+  }
+
   setHasGuessed(value: boolean) {
     this.hasGuessed = value;
+  }
+
+  addWinGame() {
+    this.winGames += 1;
   }
 }

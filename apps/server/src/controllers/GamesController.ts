@@ -39,7 +39,7 @@ export class GamesController {
     });
 
     game.on(Events.END_GAME, (sessions: PlayerSession[], data: {}) => {
-      const payload = { event: Events.END_GAME, success: true };
+      const payload = { event: Events.END_GAME, success: true, data };
 
       this.broadcast(payload, sessions);
     });
