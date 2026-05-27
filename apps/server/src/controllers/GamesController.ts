@@ -55,6 +55,12 @@ export class GamesController {
 
       this.broadcast(payload, sessions);
     });
+
+    game.on(Events.END_DRAW, (sessions: PlayerSession[], data: { timeout: boolean; message: string }) => {
+      const payload = { event: Events.END_DRAW, data: data, success: true };
+
+      this.broadcast(payload, sessions);
+    });
   }
 
   selectWord(gameId: string, word: string, emisionTimestamp: number, currentTimestamp: number, token: string) {

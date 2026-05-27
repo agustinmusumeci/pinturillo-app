@@ -202,7 +202,7 @@ export class ConnectionsController {
         gameId: response.gameId,
         drawTime: response.drawTime,
         totalRounds: response.totalRounds,
-        players: response.players.map((session) => session.getPlayer().getData),
+        players: response.players.map((session) => session.getPlayer().getData()),
       },
     };
 

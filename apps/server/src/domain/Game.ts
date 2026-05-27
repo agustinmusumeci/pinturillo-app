@@ -302,6 +302,7 @@ export class Game extends EventEmitter {
 
   handleDrawInterval() {
     this.drawInterval = setInterval(() => {
+      this.emit(Events.END_DRAW, this.players, { timeout: true, message: "The draw and guess time had finished" });
       this.setUp();
     }, DefaultDrawTime);
   }

@@ -11,6 +11,7 @@ export enum Events {
   START_DRAW = "START_DRAW",
   DRAW = "DRAW",
   GUESS_WORD = "GUESS_WORD",
+  END_DRAW = "END_DRAW",
   END_GAME = "END_GAME",
 }
 
