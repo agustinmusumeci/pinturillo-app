@@ -12,6 +12,32 @@ The ACK will include the name of the event and the success status as a boolean v
 }
 ```
 
-## Response payload format
+## Response data format
 
-The payload of an event will vary according to the event itself.
+The data of an event response will vary according to the event itself.
+
+- JOIN_ROOM Data Event Response:
+
+```
+{
+    players?: {id: String, name: String, score: Number, hasGuessed?: Boolean}
+    message: String
+}
+```
+
+- LEAVE_ROOM Data Event Response:
+
+```
+{
+    message: String
+}
+```
+
+- GUESS_WORD Data Event Response:
+
+```
+{
+    score: Number
+    message: String
+}
+```
