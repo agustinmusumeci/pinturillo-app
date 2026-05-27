@@ -103,7 +103,7 @@ export class ConnectionsController {
     const playerName = ctx.payload?.data?.name;
 
     if (!playerName) {
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, message: "The player name can not be empty" }));
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { message: "The player name can not be empty" } }));
       return;
     }
 
@@ -115,7 +115,7 @@ export class ConnectionsController {
     // Add the player session to its socket connection
     connection?.setSession(new PlayerSession(player, connectionId));
 
-    ctx.ws.send(JSON.stringify({ event: ctx?.payload?.event, success: true, message: "Player created succesfully" }));
+    ctx.ws.send(JSON.stringify({ event: ctx?.payload?.event, success: true, data: { message: "Player created succesfully" } }));
 
     return;
   };
@@ -128,7 +128,7 @@ export class ConnectionsController {
     roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
 
     //Send the ACK
-    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: true, message: "Room created succesfully" }));
+    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: true, data: { message: "Room created succesfully" } }));
 
     return;
   };
@@ -147,7 +147,7 @@ export class ConnectionsController {
     }
 
     // Send the ACK
-    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, payload: { players: response.players } }));
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, data: { players: response.players } }));
 
     const broadcastData = {
       event: ctx.payload.event,
@@ -170,7 +170,7 @@ export class ConnectionsController {
     }
 
     // Send the ACK
-    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, message: "Room leaved succesfully" }));
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, data: { message: "Room leaved succesfully" } }));
 
     const broadcastData = {
       event: ctx.payload.event,
