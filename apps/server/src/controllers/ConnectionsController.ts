@@ -70,7 +70,7 @@ export class ConnectionsController {
 
   private checkConnection: MiddlewareFn = (ctx, next) => {
     if (!ctx.connection) {
-      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false }));
+      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false, message: "There is no Connection associated." }));
       return;
     }
 
@@ -81,7 +81,7 @@ export class ConnectionsController {
     const session = ctx?.connection?.getSession();
 
     if (!session) {
-      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false }));
+      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false, message: "Session has not been initialized." }));
       return;
     }
 
