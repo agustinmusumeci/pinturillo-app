@@ -28,6 +28,7 @@ export class ConnectionsController {
       // Listen to events and define middleware execution order
       this.eventsHandler
         .on(Events.CREATE_PLAYER, [this.checkConnection, this.createPlayer])
+        .on(Events.RECONNECT, [this.reconnect])
         .on(Events.CREATE_ROOM, [this.checkConnection, this.checkSession, this.createRoom])
         .on(Events.JOIN_ROOM, [this.checkConnection, this.checkSession, this.joinRoom])
         .on(Events.LEAVE_ROOM, [this.checkConnection, this.checkSession, this.leaveRoom])
@@ -67,6 +68,12 @@ export class ConnectionsController {
   private removeConnection(connectionId: string): Boolean {
     return this.connections.delete(connectionId);
   }
+
+  private reconnect: MiddlewareFn = (ctx) => {
+    const connectionId = ctx.payload.data?.connectionId;
+
+    this.connections.set(connectionId, ctx.connection);
+  };
 
   private checkConnection: MiddlewareFn = (ctx, next) => {
     if (!ctx.connection) {
