@@ -13,6 +13,6 @@ All the data send will follow the following format:
 ```
 {
     event: Event,
-    payload: Any
+    data: Any
 }
 ```

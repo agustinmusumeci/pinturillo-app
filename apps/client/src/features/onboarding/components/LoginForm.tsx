@@ -1,8 +1,7 @@
-import type { SubmitEventHandler } from "react";
-import { useSocket } from "../../../shared/hooks/useSocket";
+import { useState, type SubmitEventHandler } from "react";
 
-export default function LoginForm() {
-  const { createPlayer } = useSocket();
+export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => void }) {
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -13,7 +12,7 @@ export default function LoginForm() {
 
     if (!name) return;
 
-    createPlayer(name);
+    onSubmit(name);
   };
 
   return (

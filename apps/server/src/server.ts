@@ -14,4 +14,5 @@ export const connectionController = new ConnectionsController(wss);
 
 httpServer.listen(PORT, () => {
   console.log(`Server at http://localhost:${PORT}`);
+  console.log(`WebSocket at ws://localhost:${PORT}`);
 });
