@@ -1,7 +1,8 @@
 import { useState, type SubmitEventHandler } from "react";
 
-export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => void }) {
+export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => Promise<boolean> }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -14,9 +15,13 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => vo
 
     if (!name) return;
 
-    onSubmit(name);
+    onSubmit(name).then((res) => {
+      if (!res) {
+        setError(true);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    });
   };
 
   return (
@@ -39,10 +44,12 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => vo
         </div>
         <button
           type="submit"
+          disabled={loading ? true : false}
           className="w-fit bg-gray-200 px-10 py-1 rounded-md"
         >
           {loading ? "Joining..." : "Join"}
         </button>
+        {error && <span className="text-red-500">An error just happened. Try again!</span>}
       </form>
     </section>
   );
