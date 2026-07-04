@@ -6,6 +6,8 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => vo
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
+    setLoading(true);
+
     const formData = new FormData(e.target);
 
     const name = formData.get("name")?.toString() ?? "";
@@ -13,6 +15,8 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => vo
     if (!name) return;
 
     onSubmit(name);
+
+    setLoading(false);
   };
 
   return (
@@ -37,7 +41,7 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => vo
           type="submit"
           className="w-fit bg-gray-200 px-10 py-1 rounded-md"
         >
-          Join
+          {loading ? "Joining..." : "Join"}
         </button>
       </form>
     </section>

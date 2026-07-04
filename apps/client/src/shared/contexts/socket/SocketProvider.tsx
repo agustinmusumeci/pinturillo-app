@@ -22,5 +22,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  return <SocketContext.Provider value={{ createPlayer }}>{children}</SocketContext.Provider>;
+  const isSocketConnected = () => {
+    if (!socketRef.current) {
+      return false;
+    }
+
+    return true;
+  };
+
+  return <SocketContext.Provider value={{ createPlayer, isSocketConnected }}>{children}</SocketContext.Provider>;
 };

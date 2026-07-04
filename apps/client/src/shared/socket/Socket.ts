@@ -13,23 +13,27 @@ export class Socket {
   }
 
   private connect(url: string) {
-    this.ws = new WebSocket(url);
+    try {
+      this.ws = new WebSocket(url);
 
-    this.ws.onopen = () => {
-      this.sendPendingMessages();
-    };
+      this.ws.onopen = () => {
+        this.sendPendingMessages();
+      };
 
-    this.ws.onmessage = (event) => {
-      this.handleMessage(event);
-    };
+      this.ws.onmessage = (event) => {
+        this.handleMessage(event);
+      };
 
-    this.ws.onerror = (event: Event) => {
-      console.error("WebSocket error:", event);
-    };
+      this.ws.onerror = (event: Event) => {
+        console.error("WebSocket error:", event);
+      };
 
-    this.ws.onclose = () => {
-      console.info("WebSocket connection closed");
-    };
+      this.ws.onclose = () => {
+        console.info("WebSocket connection closed");
+      };
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   send(payload: WsPayload) {
