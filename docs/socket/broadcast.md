@@ -34,9 +34,9 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    removedPlayerId: String
-    hostPlayerId?: String
-    playersSession: Number
+    removedPlayerId: String,
+    hostPlayerId?: String,
+    playersSession: Number,
     newDrawerPlayerId?: String
 }
 ```
@@ -47,9 +47,9 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    gameId: String
-    drawTime: Number
-    totalRounds: Number
+    gameId: String,
+    drawTime: Number,
+    totalRounds: Number,
     players: {id: String, name: String}[]
 }
 ```
@@ -58,8 +58,8 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    currentRound: number
-    drawTime: Number
+    currentRound: Number,
+    drawTime: Number,
     currentDrawer: {id: String, name: String}
 }
 ```
@@ -68,9 +68,9 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    optionWords: String[]
-    selectTime: Number
-    timestamp: Number
+    optionWords: String[],
+    selectTime: Number,
+    timestamp: Number,
     token: String
 }
 ```
@@ -79,7 +79,7 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    drawTime: Number
+    drawTime: Number,
     wordLength: Number
 }
 ```
@@ -114,7 +114,7 @@ The "data" attribute in broadcast response vary depending the Event:
 
 ```
 {
-    timeout: Boolean
+    timeout: Boolean,
     messsage: String
 }
 ```
