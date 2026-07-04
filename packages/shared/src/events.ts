@@ -18,6 +18,6 @@ export enum Events {
 
 export interface WsPayload {
   event: Events;
-  correlationId: string;
+  correlationId?: string;
   data: any;
 }

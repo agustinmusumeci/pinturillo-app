@@ -1,7 +1,7 @@
 import { createContext } from "react";
 
 interface SocketContextType {
-  createPlayer: (name: string) => boolean;
+  createPlayer: (name: string) => Promise<boolean>;
   isSocketConnected: () => boolean;
 }
 

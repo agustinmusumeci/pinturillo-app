@@ -7,7 +7,7 @@ import { Events, type WsPayload } from "@pinturillo/shared/src/events";
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
 
-  const createPlayer = (name: string): boolean => {
+  const createPlayer = async (name: string): Promise<boolean> => {
     if (!name) return false;
 
     if (!socketRef.current) {
@@ -16,10 +16,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       });
     }
 
-    const payload: WsPayload = { event: Events.CREATE_PLAYER, data: { name } };
-    socketRef.current.send(payload);
+    const payload: WsPayload = { event: Events.CREATE_PLAYER, data: { name: name } };
+    const res = await socketRef.current.request(payload);
 
-    return true;
+    return res?.success;
   };
 
   const isSocketConnected = () => {
