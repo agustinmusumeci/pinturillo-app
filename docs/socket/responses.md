@@ -17,11 +17,20 @@ The ACK will include the name of the event and the success status as a boolean v
 
 The data of an event response will vary according to the event itself.
 
+- GET_ROOMS Data Event Response:
+
+```
+{
+    rooms: RoomData[]
+    message: String
+}
+```
+
 - JOIN_ROOM Data Event Response:
 
 ```
 {
-    players?: {id: String, name: String, score: Number, hasGuessed?: Boolean}
+    players?: PlayerData[]
     message: String
 }
 ```
