@@ -15,13 +15,18 @@ export default function LoginForm({ onSubmit }: { onSubmit: (name: string) => Pr
 
     if (!name) return;
 
-    onSubmit(name).then((res) => {
-      if (!res) {
+    onSubmit(name)
+      .then((res) => {
+        if (!res) {
+          setError(true);
+        }
+      })
+      .catch(() => {
         setError(true);
-      }
-
-      setLoading(false);
-    });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (

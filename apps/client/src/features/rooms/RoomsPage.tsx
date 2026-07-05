@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
 import { useSocket } from "../../shared/hooks/useSocket";
 import RoomsList from "./components/RoomsList";
+import type { RoomData } from "@pinturillo/shared/src/room";
 
 export default function RoomsPage() {
   const { getRooms } = useSocket();
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useState<Array<RoomData>>([]);
 
   useEffect(() => {
-    getRooms()
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    getRooms().then((res) => {
+      setRooms(res);
+    });
   }, [getRooms]);
 
   return (

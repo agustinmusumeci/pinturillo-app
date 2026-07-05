@@ -64,14 +64,18 @@ export class Socket {
         reject(new Error("Request take too long"));
       }, timeoutMs);
 
-      this.pendingRequests.set(correlationId, { resolve: resolve, reject: reject, timeout: timeout });
+      try {
+        this.pendingRequests.set(correlationId, { resolve: resolve, reject: reject, timeout: timeout });
 
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        this.pendingMessages.push(paylodToSend);
-        return;
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+          this.pendingMessages.push(paylodToSend);
+          return;
+        }
+
+        this.ws.send(JSON.stringify(paylodToSend));
+      } catch (e) {
+        reject(new Error(`Error sending the request: ${e}`));
       }
-
-      this.ws.send(JSON.stringify(paylodToSend));
     });
   }
 
