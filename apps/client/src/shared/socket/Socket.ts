@@ -88,6 +88,8 @@ export class Socket {
     try {
       const payload = JSON.parse(event.data) as WsACK;
 
+      console.log(payload);
+
       // If the payload has correlationId it is a request so look for the pending request and if it is still pending, resolve it
       if (payload.correlationId && this.pendingRequests.has(payload.correlationId)) {
         const pending = this.pendingRequests.get(payload.correlationId)!;

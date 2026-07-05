@@ -28,6 +28,7 @@ export class ConnectionsController {
       // Listen to events and define middleware execution order
       this.eventsHandler
         .on(Events.CREATE_PLAYER, [this.checkConnection, this.createPlayer])
+        .on(Events.GET_ROOMS, [this.checkConnection, this.checkSession, this.getRooms])
         .on(Events.RECONNECT, [this.reconnect])
         .on(Events.CREATE_ROOM, [this.checkConnection, this.checkSession, this.createRoom])
         .on(Events.JOIN_ROOM, [this.checkConnection, this.checkSession, this.joinRoom])
@@ -132,12 +133,21 @@ export class ConnectionsController {
     const hostPlayerSession = ctx?.session;
     const { name, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password } = ctx?.payload?.data;
 
-    roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
+    this.roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
 
     //Send the ACK
     ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: true, data: { message: "Room created succesfully" } }));
 
     return;
+  };
+
+  private getRooms: MiddlewareFn = (ctx) => {
+    const rooms = this.roomsController.getRooms();
+
+    //Send the ACK
+    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: true, data: { rooms: rooms, message: "Rooms getted succesfully" } }));
+
+    return rooms;
   };
 
   // Payload: {name: string, roomId: string}

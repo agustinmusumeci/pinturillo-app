@@ -7,9 +7,9 @@ The ACK will include the name of the event and the success status as a boolean v
 ```
 {
     event: Event,
-    correlationId: String,
     sucess: Boolean,
-    data?: Any,
+    correlationId?: String,
+    data?: {...Any, message?: String},
 }
 ```
 

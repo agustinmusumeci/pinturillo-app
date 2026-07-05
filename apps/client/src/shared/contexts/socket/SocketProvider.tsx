@@ -7,6 +7,14 @@ import { Events, type WsPayload } from "@pinturillo/shared/src/events";
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
 
+  const isSocketConnected = () => {
+    if (!socketRef.current) {
+      return false;
+    }
+
+    return true;
+  };
+
   const createPlayer = async (name: string): Promise<boolean> => {
     if (!name) return false;
 
@@ -22,13 +30,14 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return res?.success;
   };
 
-  const isSocketConnected = () => {
-    if (!socketRef.current) {
-      return false;
-    }
+  const getRooms = async (): Promise<Array<unknown>> => {
+    const payload: WsPayload = { event: Events.GET_ROOMS };
+    const res = await socketRef!.current!.request(payload);
 
-    return true;
+    console.log("RESPONSE: ", res);
+
+    return [];
   };
 
-  return <SocketContext.Provider value={{ createPlayer, isSocketConnected }}>{children}</SocketContext.Provider>;
+  return <SocketContext.Provider value={{ isSocketConnected, createPlayer, getRooms }}>{children}</SocketContext.Provider>;
 };

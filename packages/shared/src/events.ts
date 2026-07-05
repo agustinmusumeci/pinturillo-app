@@ -1,6 +1,7 @@
 export enum Events {
   CREATE_PLAYER = "CREATE_PLAYER",
   RECONNECT = "RECONNECT",
+  GET_ROOMS = "GET_ROOMS",
   CREATE_ROOM = "CREATE_ROOM",
   JOIN_ROOM = "JOIN_ROOM",
   LEAVE_ROOM = "LEAVE_ROOM",
@@ -19,5 +20,5 @@ export enum Events {
 export interface WsPayload {
   event: Events;
   correlationId?: string;
-  data: any;
+  data?: any;
 }

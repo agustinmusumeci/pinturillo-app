@@ -1,5 +1,5 @@
 import { RoomPrivacy, RoomStatus } from "@pinturillo/shared/src/room";
-import type { RoomPrivacy as RoomPrivacyType, RoomStatus as RoomStatusType } from "@pinturillo/shared/src/room";
+import type { RoomData, RoomPrivacy as RoomPrivacyType, RoomStatus as RoomStatusType } from "@pinturillo/shared/src/room";
 import { Game } from "./Game";
 import { PlayerSession } from "./PlayerSession";
 import { randomUUID } from "node:crypto";
@@ -44,6 +44,21 @@ export class Room {
     if (privacy === RoomPrivacy.PRIVATE) {
       this.password = password;
     }
+  }
+
+  roomJSON(): RoomData {
+    const room = {
+      id: this.id,
+      name: this.name,
+      hostPlayer: this.hostPlayer.getPlayer().getData().name,
+      maximumPlayers: this.maximumPlayers,
+      totalGames: this.totalGames,
+      privacy: this.privacy,
+      status: this.status,
+      players: this.playerSessions.length,
+    };
+
+    return room;
   }
 
   getId(): string {

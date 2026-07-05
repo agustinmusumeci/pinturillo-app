@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { PlayerData } from "@pinturillo/shared/src/players";
 
 export class Player {
   private id: string;
@@ -15,7 +16,7 @@ export class Player {
     this.winGames = 0;
   }
 
-  getData(): { id: string; name: string; score: number; hasGuessed: boolean; winGames: number } {
+  getData(): PlayerData {
     return { id: this.id, name: this.name, score: this.score, hasGuessed: this.hasGuessed, winGames: this.winGames };
   }
 

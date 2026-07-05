@@ -1,9 +1,18 @@
 import { RoomPrivacy } from "@pinturillo/shared/src/room";
 import { PlayerSession } from "../domain/PlayerSession";
 import { Room } from "../domain/Room";
+import { createTestRooms } from "../mocks/mockRooms";
 
 export class RoomsControllers {
-  private rooms: Map<string, Room> = new Map();
+  private rooms: Map<string, Room> = createTestRooms();
+
+  getRooms() {
+    const rooms = Array.from(this.rooms.values()).map((room) => {
+      return room.roomJSON();
+    });
+
+    return rooms;
+  }
 
   addRoom(
     name: string,
