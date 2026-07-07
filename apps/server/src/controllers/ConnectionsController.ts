@@ -78,7 +78,13 @@ export class ConnectionsController {
 
   private checkConnection: MiddlewareFn = (ctx, next) => {
     if (!ctx.connection) {
-      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: false, message: "There is no Connection associated." }));
+      ctx?.ws?.send(
+        JSON.stringify({
+          event: ctx?.payload?.event,
+          success: false,
+          data: { message: "There is no Connection associated.", correlationId: ctx?.payload?.correlationId },
+        }),
+      );
       return;
     }
 
@@ -89,7 +95,7 @@ export class ConnectionsController {
     const session = ctx?.connection?.getSession();
 
     if (!session) {
-      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: false, message: "Session has not been initialized." }));
+      ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: false, data: { message: "Session has not been initialized.", correlationId: ctx?.payload?.correlationId } }));
       return;
     }
 
@@ -98,7 +104,7 @@ export class ConnectionsController {
 
   private checkToken: MiddlewareFn = (ctx, next) => {
     if (!ctx.payload?.data?.token) {
-      ctx.ws.send(JSON.stringify({ event: Events.SELECT_WORD, correlationId: ctx?.payload?.correlationId, success: false }));
+      ctx.ws.send(JSON.stringify({ event: Events.SELECT_WORD, success: false, data: { message: "The token can not be empty", correlationId: ctx?.payload?.correlationId } }));
       return;
     }
 
@@ -111,7 +117,13 @@ export class ConnectionsController {
     const playerName = ctx.payload?.data?.name;
 
     if (!playerName) {
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: false, data: { message: "The player name can not be empty" } }));
+      ctx.ws.send(
+        JSON.stringify({
+          event: ctx.payload.event,
+          success: false,
+          data: { message: "The player name can not be empty", correlationId: ctx?.payload?.correlationId },
+        }),
+      );
       return;
     }
 
@@ -123,7 +135,7 @@ export class ConnectionsController {
     // Add the player session to its socket connection
     connection?.setSession(new PlayerSession(player, connectionId));
 
-    ctx.ws.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: true, data: { message: "Player created succesfully" } }));
+    ctx.ws.send(JSON.stringify({ event: ctx?.payload?.event, success: true, data: { message: "Player created succesfully", connectionId: connectionId, correlationId: ctx?.payload?.correlationId } }));
 
     return;
   };
@@ -136,7 +148,13 @@ export class ConnectionsController {
     this.roomsController.addRoom(name, hostPlayerSession, maximumPlayers, drawTime, totalGames, roundsPerGame, privacy, password);
 
     //Send the ACK
-    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: true, data: { message: "Room created succesfully" } }));
+    ctx?.ws?.send(
+      JSON.stringify({
+        event: ctx?.payload?.event,
+        success: true,
+        data: { message: "Room created succesfully", correlationId: ctx?.payload?.correlationId },
+      }),
+    );
 
     return;
   };
@@ -145,7 +163,7 @@ export class ConnectionsController {
     const rooms = this.roomsController.getRooms();
 
     //Send the ACK
-    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, correlationId: ctx?.payload?.correlationId, success: true, data: { rooms: rooms, message: "Rooms getted succesfully" } }));
+    ctx?.ws?.send(JSON.stringify({ event: ctx?.payload?.event, success: true, data: { rooms: rooms, message: "Rooms getted succesfully", correlationId: ctx?.payload?.correlationId } }));
 
     return rooms;
   };
@@ -159,12 +177,12 @@ export class ConnectionsController {
 
     if (!response) {
       // Send the NACK
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: false }));
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { correlationId: ctx?.payload?.correlationId } }));
       return;
     }
 
     // Send the ACK
-    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: true, data: { players: response.players } }));
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, data: { players: response.players, correlationId: ctx?.payload?.correlationId } }));
 
     const broadcastData = {
       event: ctx.payload.event,
@@ -181,13 +199,13 @@ export class ConnectionsController {
 
     if (!response) {
       // Send the NACK
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: false }));
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { correlationId: ctx?.payload?.correlationId } }));
 
       return;
     }
 
     // Send the ACK
-    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: true, data: { message: "Room leaved succesfully" } }));
+    ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: true, data: { message: "Room leaved succesfully", correlationId: ctx?.payload?.correlationId } }));
 
     const broadcastData = {
       event: ctx.payload.event,
@@ -204,7 +222,7 @@ export class ConnectionsController {
     const sessions = roomsController.getSessions(ctx?.session);
 
     if (!response || !sessions) {
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, correlationId: ctx?.payload?.correlationId, success: false }));
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { correlationId: ctx?.payload?.correlationId } }));
       return;
     }
 
