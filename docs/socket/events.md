@@ -13,7 +13,6 @@ All the data send will follow the following format:
 ```
 {
     event: Event,
-    correlationId?: String,
     data: Any
 }
 ```

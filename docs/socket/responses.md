@@ -9,7 +9,7 @@ The ACK will include the name of the event and the success status as a boolean v
     event: Event,
     sucess: Boolean,
     correlationId?: String,
-    data?: {...Any, message?: String},
+    data?: {...Any, message?: String, correlationId?: String},
 }
 ```
 
@@ -21,8 +21,9 @@ The data of an event response will vary according to the event itself.
 
 ```
 {
-    rooms: RoomData[]
-    message: String
+    rooms: RoomData[],
+    message: String,
+    correlationId: String
 }
 ```
 
@@ -30,8 +31,9 @@ The data of an event response will vary according to the event itself.
 
 ```
 {
-    players?: PlayerData[]
-    message: String
+    players?: PlayerData[],
+    message: String,
+    correlationId: String
 }
 ```
 
@@ -39,7 +41,8 @@ The data of an event response will vary according to the event itself.
 
 ```
 {
-    message: String
+    message: String,
+    correlationId: String
 }
 ```
 
