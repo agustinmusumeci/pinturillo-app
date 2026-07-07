@@ -1,6 +1,6 @@
 import { useRef, type ReactNode } from "react";
 import { SocketContext } from "./SocketContext";
-import { Socket } from "../../socket/Socket";
+import { Socket } from "../../lib/socket/Socket";
 import { SOCKET_URL } from "../../constants/url";
 import { Events, type WsPayload } from "@pinturillo/shared/src/events";
 import { type RoomData } from "@pinturillo/shared/src/room";
