@@ -4,6 +4,8 @@ import { Socket } from "../../lib/socket/Socket";
 import { SOCKET_URL } from "../../constants/url";
 import { Events, type WsPayload } from "@pinturillo/shared/src/events";
 import { type RoomData } from "@pinturillo/shared/src/room";
+import { CONNECTION_STORAGE_KEY } from "../../constants/storage";
+import storage from "../../lib/storage/Storage";
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
@@ -27,6 +29,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
     const payload: WsPayload = { event: Events.CREATE_PLAYER, data: { name: name } };
     const res = await socketRef.current.request(payload);
+
+    const connectionId = res?.data?.connectionId ?? "";
+
+    storage.setLocalStorage(CONNECTION_STORAGE_KEY, connectionId);
 
     return res?.success;
   };

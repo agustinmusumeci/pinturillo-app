@@ -12,4 +12,5 @@ class Storage {
   }
 }
 
-export default new Storage();
+const storage = new Storage();
+export default storage;

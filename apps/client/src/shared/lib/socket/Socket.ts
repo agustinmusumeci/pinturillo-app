@@ -95,14 +95,14 @@ export class Socket {
       console.log(payload);
 
       // If the payload has correlationId it is a request so look for the pending request and if it is still pending, resolve it
-      if (payload.correlationId && this.pendingRequests.has(payload.correlationId)) {
-        const pending = this.pendingRequests.get(payload.correlationId)!;
+      if (payload.data?.correlationId && this.pendingRequests.has(payload.data?.correlationId)) {
+        const pending = this.pendingRequests.get(payload.data?.correlationId)!;
 
         clearTimeout(pending.timeout);
-        this.pendingRequests.delete(payload.correlationId);
+        this.pendingRequests.delete(payload.data?.correlationId);
 
         if (!payload.success) {
-          pending.reject(payload.message);
+          pending.reject(payload.data?.message);
         } else {
           pending.resolve(payload);
         }
