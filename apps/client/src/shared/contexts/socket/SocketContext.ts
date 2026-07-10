@@ -6,6 +6,7 @@ interface SocketContextType {
   reconnect: (connectionId: string) => Promise<boolean>;
   createPlayer: (name: string) => Promise<boolean>;
   getRooms: () => Promise<Array<RoomData>>;
+  joinRoom: (roomId: string, password?: string) => Promise<boolean>;
 }
 
 export const SocketContext = createContext({} as SocketContextType);

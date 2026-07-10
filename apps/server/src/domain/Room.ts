@@ -69,11 +69,39 @@ export class Room {
     return this.hostPlayer;
   }
 
+  getMaximumPlayers(): number {
+    return this.maximumPlayers;
+  }
+
   getPlayers(): PlayerSession[] {
     return this.playerSessions;
   }
 
-  joinRoom(session: PlayerSession) {
+  getPrivacy(): RoomPrivacy {
+    return this.privacy;
+  }
+
+  checkPassword(password: string): Boolean {
+    if (password === this.password) return true;
+
+    return false;
+  }
+
+  joinRoom(session: PlayerSession, password?: string) {
+    if (this.playerSessions.length + 1 > this.maximumPlayers) {
+      return null;
+    }
+
+    const privacy = this.getPrivacy();
+
+    if (privacy === RoomPrivacy.PRIVATE) {
+      if (!password) return null;
+
+      const isPasswordValid = this.checkPassword(password);
+
+      if (!isPasswordValid) return null;
+    }
+
     this.playerSessions.push(session);
 
     if (this.currentGame) {
@@ -83,6 +111,8 @@ export class Room {
         this.currentGame.addPlayer(session, true);
       }
     }
+
+    return true;
   }
 
   leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } {

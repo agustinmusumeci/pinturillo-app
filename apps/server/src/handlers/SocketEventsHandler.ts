@@ -22,15 +22,15 @@ export class SocketEventsHandler {
     this.runMiddlewares(ctx, middlewares, 0);
   }
 
-  runMiddlewares(data: WsContext, middlwares: MiddlewareFn[], index: number) {
-    if (index >= middlwares.length) return;
+  runMiddlewares(data: WsContext, middlewares: MiddlewareFn[], index: number) {
+    if (index >= middlewares.length) return;
 
-    const middleware = middlwares[index];
+    const middleware = middlewares[index];
 
     if (!middleware) return;
 
-    const next = (...middlewareArgs: any) => {
-      this.runMiddlewares({ ...data, ...middlewareArgs }, middlwares, index + 1);
+    const next = (middlewareArgs: any) => {
+      this.runMiddlewares({ ...data, ...middlewareArgs }, middlewares, index + 1);
     };
 
     middleware(data, next);

@@ -76,5 +76,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return rooms;
   };
 
-  return <SocketContext.Provider value={{ isSocketConnected, reconnect, createPlayer, getRooms }}>{children}</SocketContext.Provider>;
+  const joinRoom = async (roomId: string, password: string = ""): Promise<boolean> => {
+    const payload: WsPayload = { event: Events.JOIN_ROOM, data: { roomId: roomId, password: password } };
+
+    const res = await socketRef!.current!.request(payload);
+
+    return res.success ?? false;
+  };
+
+  return <SocketContext.Provider value={{ isSocketConnected, reconnect, createPlayer, getRooms, joinRoom }}>{children}</SocketContext.Provider>;
 };

@@ -201,12 +201,15 @@ export class ConnectionsController {
     return rooms;
   };
 
-  // Payload: {name: string, roomId: string}
+  // Payload: {name: string, roomId: string, password?: string}
   private joinRoom: MiddlewareFn = (ctx) => {
     const session = ctx?.session;
     const roomId = ctx?.payload?.data?.roomId;
+    const password = ctx?.payload?.data?.password;
 
-    const response = this.roomsController.joinRoom(roomId, session);
+    console.log(ctx);
+
+    const response = this.roomsController.joinRoom(roomId, session, password);
 
     if (!response) {
       // Send the NACK
@@ -315,7 +318,11 @@ export class ConnectionsController {
 
       const conn = this.connections.get(connectionId);
 
-      conn?.send(payload);
+      if (!conn) continue;
+
+      console.log("PAYLOAD: ", payload, "HOST: ", host);
+
+      conn?.send(JSON.stringify(payload));
     }
   }
 

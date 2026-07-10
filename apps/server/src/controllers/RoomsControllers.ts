@@ -29,16 +29,25 @@ export class RoomsControllers {
     return room;
   }
 
-  joinRoom(roomId: string, session: PlayerSession): { newPlayerId: string; players: { id: string; name: string; score: number; hasGuessed?: boolean }[]; sessions: PlayerSession[] } | null {
+  joinRoom(
+    roomId: string,
+    session: PlayerSession,
+    password?: string,
+  ): { newPlayerId: string; players: { id: string; name: string; score: number; hasGuessed?: boolean }[]; sessions: PlayerSession[] } | null {
     let room = this.rooms.get(roomId);
 
     if (!room) {
       return null;
     }
 
+    const res = room.joinRoom(session, password);
+
+    if (!res) {
+      return null;
+    }
+
     session.setRoom(room);
     const playerSessions = room.getPlayers();
-    room.joinRoom(session);
 
     let response = {
       newPlayerId: session.getPlayer().getData().id,
