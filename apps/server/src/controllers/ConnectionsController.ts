@@ -49,7 +49,8 @@ export class ConnectionsController {
       });
 
       ws.on("close", () => {
-        this.removeConnection(connectionId);
+        // This code should be removed because there is now a heartbeat func
+        // this.removeConnection(connectionId);
       });
     });
 
@@ -71,9 +72,41 @@ export class ConnectionsController {
   }
 
   private reconnect: MiddlewareFn = (ctx) => {
-    const connectionId = ctx.payload.data?.connectionId;
+    const oldConnectionId = ctx.payload.data?.connectionId;
 
-    this.connections.set(connectionId, ctx.connection);
+    // Get the previous connection because to get the session
+    const connection = this.connections.get(oldConnectionId);
+
+    if (!connection) {
+      ctx?.ws?.send(
+        JSON.stringify({
+          event: ctx?.payload?.event,
+          success: false,
+          data: { message: "Unable to reconnect. There is no connectionId associated.", correlationId: ctx?.payload?.correlationId },
+        }),
+      );
+
+      return;
+    }
+
+    // If there is a session alive, associate it to the new connection
+    const oldSession = connection.getSession();
+
+    if (oldSession) {
+      ctx.connection.setSession(oldSession);
+    }
+
+    // Delete the previous connectionId
+    this.removeConnection(oldConnectionId);
+
+    ctx?.ws?.send(
+      JSON.stringify({
+        event: ctx?.payload?.event,
+        success: true,
+        // Send back to the client the new connectionId
+        data: { message: "Reconnected succesfully.", connectionId: ctx.connection.getId(), correlationId: ctx?.payload?.correlationId },
+      }),
+    );
   };
 
   private checkConnection: MiddlewareFn = (ctx, next) => {

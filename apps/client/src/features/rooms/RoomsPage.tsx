@@ -8,6 +8,7 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<Array<RoomData>>([]);
 
   useEffect(() => {
+    console.log("GET ROOMS SHIA");
     getRooms().then((res) => {
       setRooms(res);
     });

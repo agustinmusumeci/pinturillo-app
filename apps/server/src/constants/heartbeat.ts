@@ -1,1 +1,1 @@
-export const HeartbeatInterval = 30_000;
+export const HeartbeatInterval = 60_000;

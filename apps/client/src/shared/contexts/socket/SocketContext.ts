@@ -3,6 +3,7 @@ import { createContext } from "react";
 
 interface SocketContextType {
   isSocketConnected: () => boolean;
+  reconnect: (connectionId: string) => Promise<boolean>;
   createPlayer: (name: string) => Promise<boolean>;
   getRooms: () => Promise<Array<RoomData>>;
 }
