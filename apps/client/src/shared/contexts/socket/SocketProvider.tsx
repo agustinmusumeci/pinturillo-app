@@ -4,6 +4,7 @@ import { Socket } from "../../lib/socket/Socket";
 import { SOCKET_URL } from "../../constants/url";
 import { Events, type WsPayload } from "@pinturillo/shared/src/events";
 import { type RoomData } from "@pinturillo/shared/src/room";
+import type { WsACK } from "@pinturillo/shared/src/responses";
 import { CONNECTION_STORAGE_KEY } from "../../constants/storage";
 import storage from "../../lib/storage/Storage";
 
@@ -76,12 +77,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return rooms;
   };
 
-  const joinRoom = async (roomId: string, password: string = ""): Promise<boolean> => {
+  const joinRoom = async (roomId: string, password: string = ""): Promise<WsACK | null> => {
     const payload: WsPayload = { event: Events.JOIN_ROOM, data: { roomId: roomId, password: password } };
 
     const res = await socketRef!.current!.request(payload);
 
-    return res.success ?? false;
+    return res ?? null;
   };
 
   return <SocketContext.Provider value={{ isSocketConnected, reconnect, createPlayer, getRooms, joinRoom }}>{children}</SocketContext.Provider>;

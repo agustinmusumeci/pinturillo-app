@@ -100,11 +100,7 @@ export class Socket {
         clearTimeout(pending.timeout);
         this.pendingRequests.delete(payload.data?.correlationId);
 
-        if (!payload.success) {
-          pending.reject(payload.data?.message);
-        } else {
-          pending.resolve(payload);
-        }
+        pending.resolve(payload);
       }
 
       if (this.onMessageHandler) {
