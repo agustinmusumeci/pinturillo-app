@@ -207,13 +207,13 @@ export class ConnectionsController {
     const roomId = ctx?.payload?.data?.roomId;
     const password = ctx?.payload?.data?.password;
 
-    console.log(ctx);
-
     const response = this.roomsController.joinRoom(roomId, session, password);
 
-    if (!response) {
-      // Send the NACK
-      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { correlationId: ctx?.payload?.correlationId } }));
+    // Send the NACK
+    if (!response || !response?.success || !("players" in response) || !("sessions" in response)) {
+      // Black magic with the types 😎
+      const message = response && typeof response === "object" && "message" in response ? (response as any).message : undefined;
+      ctx.ws.send(JSON.stringify({ event: ctx.payload.event, success: false, data: { correlationId: ctx?.payload?.correlationId, message } }));
       return;
     }
 

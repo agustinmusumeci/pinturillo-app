@@ -33,23 +33,30 @@ export class RoomsControllers {
     roomId: string,
     session: PlayerSession,
     password?: string,
-  ): { newPlayerId: string; players: { id: string; name: string; score: number; hasGuessed?: boolean }[]; sessions: PlayerSession[] } | null {
+  ): { success: boolean; newPlayerId: string; players: { id: string; name: string; score: number; hasGuessed?: boolean }[]; sessions: PlayerSession[] } | { success: boolean; message: string } {
     let room = this.rooms.get(roomId);
 
     if (!room) {
-      return null;
+      return {
+        success: false,
+        message: "The room does not exist.",
+      };
     }
 
     const res = room.joinRoom(session, password);
 
-    if (!res) {
-      return null;
+    if (!res || !res.success) {
+      return {
+        success: false,
+        message: res?.message ?? "",
+      };
     }
 
     session.setRoom(room);
     const playerSessions = room.getPlayers();
 
     let response = {
+      success: true,
       newPlayerId: session.getPlayer().getData().id,
       players: playerSessions.map((session) => session.getPlayer().getData()),
       sessions: playerSessions,

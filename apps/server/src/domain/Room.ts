@@ -87,19 +87,30 @@ export class Room {
     return false;
   }
 
-  joinRoom(session: PlayerSession, password?: string) {
+  joinRoom(session: PlayerSession, password?: string): { success: boolean; message: string } {
     if (this.playerSessions.length + 1 > this.maximumPlayers) {
-      return null;
+      return {
+        success: false,
+        message: "The room is full.",
+      };
     }
 
     const privacy = this.getPrivacy();
 
     if (privacy === RoomPrivacy.PRIVATE) {
-      if (!password) return null;
+      if (!password)
+        return {
+          success: false,
+          message: "The password can not be empty.",
+        };
 
       const isPasswordValid = this.checkPassword(password);
 
-      if (!isPasswordValid) return null;
+      if (!isPasswordValid)
+        return {
+          success: false,
+          message: "Password is incorrect.",
+        };
     }
 
     this.playerSessions.push(session);
@@ -112,7 +123,7 @@ export class Room {
       }
     }
 
-    return true;
+    return { success: true, message: "Player joined successfuly" };
   }
 
   leaveRoom(playerId: string): { removedPlayerId: string; hostPlayerId?: string; remainingSessions: PlayerSession[]; newDrawerPlayerId?: string } {
