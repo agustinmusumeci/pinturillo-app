@@ -31,8 +31,13 @@ export default function ProtectedRoutes() {
 
       // If reconnect goes well, render Outlet otherwise render Navigate
       try {
-        await reconnect(connectionId);
-        if (!cancelled) setStatus("success");
+        const res = await reconnect(connectionId);
+
+        if (res) {
+          if (!cancelled) setStatus("success");
+        } else {
+          setStatus("failed");
+        }
       } catch (e) {
         console.log("RECONNECT ERROR: ", e);
         if (!cancelled) setStatus("failed");
